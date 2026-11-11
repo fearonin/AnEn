@@ -1,6 +1,5 @@
 package com.example.anen
 
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -9,10 +8,10 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
 import androidx.core.net.toUri
 import com.example.anen.data.DBHelper
 import com.example.anen.service.OverlayAccessibilityService
+import com.example.anen.utils.PreferencesManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.switchmaterial.SwitchMaterial
 
@@ -33,17 +32,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnExportAll: MaterialButton
 
     private lateinit var dbHelper: DBHelper
-    private val prefsName = "AnEnPrefs"
-    private val keyTargetPackage = "target_package"
+    private lateinit var preferencesManager: PreferencesManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         dbHelper = DBHelper(this)
+        preferencesManager = PreferencesManager(this)
+
         initViews()
         setupListeners()
         updateTargetAppButton()
+        updateSwitchState()
     }
 
     override fun onResume() {
@@ -65,9 +66,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        // Global toggle (State saving to SharedPreferences will be used in Stage 4)
-        switchService.setOnCheckedChangeListener { _, _ ->
-            // TODO: Implement service toggle logic in Stage 4
+        // Save toggle state to preferences when clicked
+        switchService.setOnCheckedChangeListener { _, isChecked ->
+            preferencesManager.setServiceEnabled(isChecked)
         }
 
         btnOverlayPermission.setOnClickListener { requestOverlayPermission() }
@@ -80,6 +81,11 @@ class MainActivity : AppCompatActivity() {
         btnExport.setOnClickListener { showComingSoonToast() }
         btnImport.setOnClickListener { showComingSoonToast() }
         btnExportAll.setOnClickListener { showComingSoonToast() }
+    }
+
+    private fun updateSwitchState() {
+        // Synchronize switch UI with saved state from PreferencesManager
+        switchService.isChecked = preferencesManager.isServiceEnabled()
     }
 
     private fun showComingSoonToast() {
@@ -149,7 +155,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Sort apps alphabetically by their label. Explicitly typing Pair to avoid compiler confusion.
+        // Sort apps alphabetically by their label
         val appList = apps.map {
             val label = pm.getApplicationLabel(it).toString()
             Pair<String, String>(label, it.packageName)
@@ -161,32 +167,23 @@ class MainActivity : AppCompatActivity() {
             .setTitle(R.string.dialog_select_app_title)
             .setItems(appNames) { _, which ->
                 val selectedPackage = appList[which].second
-                saveTargetPackage(selectedPackage)
+                preferencesManager.setTargetPackage(selectedPackage)
                 updateTargetAppButton()
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
-    private fun saveTargetPackage(packageName: String) {
-        val prefs = getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-        prefs.edit { putString(keyTargetPackage, packageName) }
-    }
-
-    private fun getTargetPackage(): String? {
-        val prefs = getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-        return prefs.getString(keyTargetPackage, null)
-    }
-
     private fun updateTargetAppButton() {
-        val targetPackage = getTargetPackage()
+        val targetPackage = preferencesManager.getTargetPackage()
+
         if (targetPackage != null) {
             try {
                 val appInfo = packageManager.getApplicationInfo(targetPackage, 0)
                 val appName = packageManager.getApplicationLabel(appInfo).toString()
                 btnSelectApp.text = getString(R.string.btn_select_app_selected, appName)
             } catch (_: PackageManager.NameNotFoundException) {
-                // App was uninstalled. Ignored parameter "_" fixes the unused variable warning.
+                // App was uninstalled
                 btnSelectApp.text = getString(R.string.btn_select_app)
             }
         } else {
