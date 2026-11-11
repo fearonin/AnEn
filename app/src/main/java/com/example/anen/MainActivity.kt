@@ -3,10 +3,15 @@ package com.example.anen
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.EditText
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
+import android.view.View
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
@@ -29,10 +34,6 @@ import java.io.OutputStreamWriter
 import java.util.Calendar
 import java.util.Locale
 
-/**
- * Main screen of the application.
- * Handles service toggling, permission requests, target app selection, and database operations.
- */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var switchService: SwitchMaterial
@@ -44,6 +45,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnExport: MaterialButton
     private lateinit var btnImport: MaterialButton
     private lateinit var btnExportAll: MaterialButton
+    private lateinit var btnClearAll: MaterialButton
+    private lateinit var btnSettings: MaterialButton
 
     private lateinit var dbHelper: DBHelper
     private lateinit var preferencesManager: PreferencesManager
@@ -51,31 +54,28 @@ class MainActivity : AppCompatActivity() {
     private var pendingExportWords: List<String> = emptyList()
     private var isExportAllMode = false
 
-    // --- ACTIVITY RESULT CONTRACTS ---
-
     private val createDocumentLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("text/plain")
-    ) { uri: Uri? ->
-        if (uri != null) {
-            writeWordsToFile(uri)
-        }
-    }
+    ) { uri: Uri? -> if (uri != null) writeWordsToFile(uri) }
 
     private val openDocumentLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            importWordsFromFile(uri)
-        }
-    }
+    ) { uri: Uri? -> if (uri != null) importWordsFromFile(uri) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Apply theme BEFORE super.onCreate
+        preferencesManager = PreferencesManager(this)
+        when (preferencesManager.getTheme()) {
+            "cyan" -> setTheme(R.style.Theme_AnEn_Cyan)
+            "green" -> setTheme(R.style.Theme_AnEn_Green)
+            "light" -> setTheme(R.style.Theme_AnEn_Light)
+            else -> setTheme(R.style.Theme_AnEn)
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         dbHelper = DBHelper(this)
-        preferencesManager = PreferencesManager(this)
-
         initViews()
         setupListeners()
         updateTargetAppButton()
@@ -97,6 +97,8 @@ class MainActivity : AppCompatActivity() {
         btnExport = findViewById(R.id.btnExport)
         btnImport = findViewById(R.id.btnImport)
         btnExportAll = findViewById(R.id.btnExportAll)
+        btnClearAll = findViewById(R.id.btnClearAll)
+        btnSettings = findViewById(R.id.btnSettings)
     }
 
     private fun setupListeners() {
@@ -113,21 +115,60 @@ class MainActivity : AppCompatActivity() {
         btnExport.setOnClickListener { handleExport(exportAll = false) }
         btnImport.setOnClickListener { openDocumentLauncher.launch(arrayOf("text/plain")) }
         btnExportAll.setOnClickListener { handleExport(exportAll = true) }
+        btnClearAll.setOnClickListener { showClearDatabaseDialog() }
+        btnSettings.setOnClickListener { showSettingsDialog() }
+    }
+
+    private fun showClearDatabaseDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.clear_db_title)
+            .setMessage(R.string.clear_db_message)
+            .setPositiveButton(R.string.btn_yes) { _, _ ->
+                dbHelper.clearAllWords()
+                Toast.makeText(this, "Database cleared", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(R.string.btn_cancel, null)
+            .show()
+    }
+
+    private fun showSettingsDialog() {
+        val themes = arrayOf(
+            getString(R.string.theme_monochrome),
+            getString(R.string.theme_light),
+            getString(R.string.theme_green),
+            getString(R.string.theme_cyan)
+        )
+        val themeKeys = arrayOf("monochrome", "light", "green", "cyan")
+        val currentThemeKey = preferencesManager.getTheme()
+        val currentIndex = themeKeys.indexOf(currentThemeKey)
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.settings_theme)
+            .setSingleChoiceItems(themes, currentIndex) { dialog, which ->
+                val selected = themeKeys[which]
+                if (selected != currentThemeKey) {
+                    preferencesManager.setTheme(selected)
+                    dialog.dismiss()
+                    recreate() // Recreate activity to apply new theme
+                } else {
+                    dialog.dismiss()
+                }
+            }
+            .show()
     }
 
     // ==========================================
-    // --- DATABASE VIEWING LOGIC ---
+    // --- DATABASE VIEWING (FIXED DATE HIERARCHY) ---
     // ==========================================
 
     private fun showNormalDatabaseView() {
-        // Database is already sorted by created_at DESC in DBHelper
         val words = dbHelper.getAllWords()
         if (words.isEmpty()) {
             Toast.makeText(this, R.string.dialog_db_empty, Toast.LENGTH_SHORT).show()
             return
         }
 
-        val sb = StringBuilder()
+        val sb = SpannableStringBuilder()
         val calendar = Calendar.getInstance()
 
         var lastYear = -1
@@ -139,34 +180,46 @@ class MainActivity : AppCompatActivity() {
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH)
             val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-            // Get full month name (e.g., "November")
             val monthName = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) ?: ""
 
-            // Add Year Header
+            // 1. Year
             if (year != lastYear) {
-                sb.append("📅 $year\n")
+                val yearText = "$year\n"
+                val start = sb.length
+                sb.append(yearText)
+                sb.setSpan(RelativeSizeSpan(1.6f), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                sb.setSpan(StyleSpan(Typeface.BOLD), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 lastYear = year
                 lastMonth = -1
                 lastDay = -1
             }
-            // Add Month Header
+
+            // 2. Month
             if (month != lastMonth) {
-                sb.append("    ┣ 📁 $monthName\n")
+                val monthText = "  📁 $monthName\n"
+                val start = sb.length
+                sb.append(monthText)
+                sb.setSpan(RelativeSizeSpan(1.3f), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                sb.setSpan(StyleSpan(Typeface.BOLD), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 lastMonth = month
                 lastDay = -1
             }
-            // Add Day Header
+
+            // 3. Day
             if (day != lastDay) {
-                sb.append("    ┃ ┣ 📅 $day\n")
+                val dayText = "    $day\n"
+                val start = sb.length
+                sb.append(dayText)
+                sb.setSpan(RelativeSizeSpan(1.15f), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                sb.setSpan(StyleSpan(Typeface.BOLD), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 lastDay = day
             }
-            // Add the word itself
-            sb.append("    ┃ ┃ • ${word.word}\n")
+
+            // 4. Words (Normal size, separated by newline)
+            sb.append("      ${word.word}\n")
         }
 
-        // Pass 'isSelectable = true' so the user can copy the formatted text
-        showScrollableDialog(getString(R.string.dialog_db_title), sb.toString().trim(), isSelectable = true)
+        showScrollableDialog(getString(R.string.dialog_db_title), sb, isSelectable = true)
     }
 
     private fun showRawDatabaseView() {
@@ -175,13 +228,11 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.dialog_db_empty, Toast.LENGTH_SHORT).show()
             return
         }
-
-        // Raw format: words separated by newline
         val rawText = words.joinToString("\n") { it.word }
         showScrollableDialog(getString(R.string.dialog_db_raw_title), rawText, isSelectable = true)
     }
 
-    private fun showScrollableDialog(title: String, content: String, isSelectable: Boolean) {
+    private fun showScrollableDialog(title: String, content: CharSequence, isSelectable: Boolean) {
         val textView = TextView(this).apply {
             text = content
             setPadding(48, 48, 48, 48)
@@ -189,9 +240,7 @@ class MainActivity : AppCompatActivity() {
             setTextIsSelectable(isSelectable)
         }
 
-        val scrollView = ScrollView(this).apply {
-            addView(textView)
-        }
+        val scrollView = ScrollView(this).apply { addView(textView) }
 
         AlertDialog.Builder(this)
             .setTitle(title)
@@ -201,118 +250,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ==========================================
-    // --- EXPORT LOGIC ---
-    // ==========================================
-
-    private fun handleExport(exportAll: Boolean) {
-        val wordsToExport = if (exportAll) {
-            dbHelper.getAllWords()
-        } else {
-            dbHelper.getUnexportedWords()
-        }
-
-        if (wordsToExport.isEmpty()) {
-            if (!exportAll) {
-                Toast.makeText(this, R.string.toast_export_empty, Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, R.string.dialog_db_empty, Toast.LENGTH_SHORT).show()
-            }
-            return
-        }
-
-        pendingExportWords = wordsToExport.map { it.word }
-        isExportAllMode = exportAll
-
-        val fileName = if (exportAll) "anen_all_words.txt" else "anen_new_words.txt"
-        createDocumentLauncher.launch(fileName)
-    }
-
-    private fun writeWordsToFile(uri: Uri) {
-        lifecycleScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    contentResolver.openOutputStream(uri)?.use { outputStream ->
-                        val writer = OutputStreamWriter(outputStream)
-                        writer.write(pendingExportWords.joinToString("\t"))
-                        writer.flush()
-                    }
-                }
-
-                if (!isExportAllMode) {
-                    withContext(Dispatchers.IO) {
-                        dbHelper.markAsExported(pendingExportWords)
-                    }
-                }
-
-                Toast.makeText(this@MainActivity, R.string.toast_export_success, Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(this@MainActivity, R.string.toast_io_error, Toast.LENGTH_SHORT).show()
-            } finally {
-                pendingExportWords = emptyList()
-            }
-        }
-    }
-
-    // ==========================================
-    // --- IMPORT LOGIC ---
-    // ==========================================
-
-    private fun importWordsFromFile(uri: Uri) {
-        lifecycleScope.launch {
-            try {
-                val importedCount = withContext(Dispatchers.IO) {
-                    var count = 0
-                    contentResolver.openInputStream(uri)?.use { inputStream ->
-                        val reader = BufferedReader(InputStreamReader(inputStream))
-                        val content = reader.readText()
-
-                        val words = content.split(Regex("[\\t\\n\\s]+"))
-                            .map { it.trim().lowercase() }
-                            .filter { it.isNotEmpty() }
-                            .distinct()
-
-                        for (word in words) {
-                            if (dbHelper.addWord(word)) {
-                                count++
-                            }
-                        }
-                    }
-                    count
-                }
-
-                Toast.makeText(
-                    this@MainActivity,
-                    getString(R.string.toast_import_success) + " ($importedCount new words)",
-                    Toast.LENGTH_LONG
-                ).show()
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(this@MainActivity, R.string.toast_io_error, Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    // ==========================================
-    // --- PERMISSIONS & APP SELECTION ---
+    // --- PERMISSIONS (UI FIX) ---
     // ==========================================
 
     private fun updatePermissionButtonsState() {
+        // Hide overlay button if granted, show if not
         if (Settings.canDrawOverlays(this)) {
-            btnOverlayPermission.setText(R.string.overlay_granted)
-            btnOverlayPermission.isEnabled = false
+            btnOverlayPermission.visibility = View.GONE
         } else {
-            btnOverlayPermission.setText(R.string.btn_grant_overlay)
-            btnOverlayPermission.isEnabled = true
+            btnOverlayPermission.visibility = View.VISIBLE
         }
 
+        // Hide accessibility button if granted, show if not
         if (isAccessibilityServiceEnabled()) {
-            btnAccessibilityPermission.setText(R.string.accessibility_granted)
-            btnAccessibilityPermission.isEnabled = false
+            btnAccessibilityPermission.visibility = View.GONE
         } else {
-            btnAccessibilityPermission.setText(R.string.btn_grant_accessibility)
-            btnAccessibilityPermission.isEnabled = true
+            btnAccessibilityPermission.visibility = View.VISIBLE
         }
     }
 
@@ -333,21 +286,76 @@ class MainActivity : AppCompatActivity() {
         return enabledServices.split(":").any { it.equals(service, ignoreCase = true) }
     }
 
+    // ==========================================
+    // --- EXPORT / IMPORT / APP SELECT ---
+    // ==========================================
+
+    private fun handleExport(exportAll: Boolean) {
+        val wordsToExport = if (exportAll) dbHelper.getAllWords() else dbHelper.getUnexportedWords()
+
+        if (wordsToExport.isEmpty()) {
+            if (!exportAll) Toast.makeText(this, R.string.toast_export_empty, Toast.LENGTH_SHORT).show()
+            else Toast.makeText(this, R.string.dialog_db_empty, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        pendingExportWords = wordsToExport.map { it.word }
+        isExportAllMode = exportAll
+
+        val fileName = if (exportAll) "anen_all_words.txt" else "anen_new_words.txt"
+        createDocumentLauncher.launch(fileName)
+    }
+
+    private fun writeWordsToFile(uri: Uri) {
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    contentResolver.openOutputStream(uri)?.use { outputStream ->
+                        val writer = OutputStreamWriter(outputStream)
+                        writer.write(pendingExportWords.joinToString("\t"))
+                        writer.flush()
+                    }
+                }
+                if (!isExportAllMode) {
+                    withContext(Dispatchers.IO) { dbHelper.markAsExported(pendingExportWords) }
+                }
+                Toast.makeText(this@MainActivity, R.string.toast_export_success, Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, R.string.toast_io_error, Toast.LENGTH_SHORT).show()
+            } finally {
+                pendingExportWords = emptyList()
+            }
+        }
+    }
+
+    private fun importWordsFromFile(uri: Uri) {
+        lifecycleScope.launch {
+            try {
+                val importedCount = withContext(Dispatchers.IO) {
+                    var count = 0
+                    contentResolver.openInputStream(uri)?.use { inputStream ->
+                        val reader = BufferedReader(InputStreamReader(inputStream))
+                        val content = reader.readText()
+                        val words = content.split(Regex("[\\t\\n\\s]+")).map { it.trim().lowercase() }.filter { it.isNotEmpty() }.distinct()
+                        for (word in words) { if (dbHelper.addWord(word)) count++ }
+                    }
+                    count
+                }
+                Toast.makeText(this@MainActivity, getString(R.string.toast_import_success) + " ($importedCount)", Toast.LENGTH_LONG).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, R.string.toast_io_error, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun showAppSelectionDialog() {
         val pm = packageManager
-        val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-            .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
-
+        val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA).filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
         if (apps.isEmpty()) {
             Toast.makeText(this, R.string.toast_no_apps_found, Toast.LENGTH_SHORT).show()
             return
         }
-
-        val appList = apps.map {
-            val label = pm.getApplicationLabel(it).toString()
-            Pair<String, String>(label, it.packageName)
-        }.sortedBy { it.first }
-
+        val appList = apps.map { Pair<String, String>(pm.getApplicationLabel(it).toString(), it.packageName) }.sortedBy { it.first }
         val appNames = appList.map { it.first }.toTypedArray()
 
         AlertDialog.Builder(this)
@@ -356,7 +364,7 @@ class MainActivity : AppCompatActivity() {
                 preferencesManager.setTargetPackage(appList[which].second)
                 updateTargetAppButton()
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
 

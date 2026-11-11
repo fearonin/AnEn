@@ -11,15 +11,28 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Service Toggle -->
+        <!-- Top Bar with Settings -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSettings"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_settings" />
+        </LinearLayout>
+
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switchService"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/service_toggle_label"
             android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textStyle="bold" />
 
         <View
             android:layout_width="match_parent"
@@ -28,7 +41,7 @@
             android:layout_marginBottom="16dp"
             android:background="?attr/colorControlNormal" />
 
-        <!-- Permissions Section -->
+        <!-- Permissions Section (Will be hidden dynamically) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOverlayPermission"
             android:layout_width="match_parent"
@@ -102,19 +115,34 @@
                 android:text="@string/btn_import" />
         </LinearLayout>
 
-        <!-- Spacer to push the bottom button down if needed -->
         <Space
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- Export All Button (Bottom) -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnExportAll"
+        <!-- Bottom Buttons: Clear All & Export All -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_export_all"
-            android:textStyle="bold" />
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClearAll"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="@string/btn_clear_all" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExportAll"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="@string/btn_export_all" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

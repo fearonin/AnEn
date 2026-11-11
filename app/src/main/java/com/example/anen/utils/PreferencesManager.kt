@@ -43,4 +43,14 @@ class PreferencesManager(context: Context) {
     fun isServiceEnabled(): Boolean {
         return prefs.getBoolean(KEY_SERVICE_ENABLED, false)
     }
+
+    private val KEY_THEME = "app_theme"
+
+    fun setTheme(theme: String) {
+        prefs.edit { putString(KEY_THEME, theme) }
+    }
+
+    fun getTheme(): String {
+        return prefs.getString(KEY_THEME, "monochrome") ?: "monochrome"
+    }
 }

@@ -161,4 +161,13 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         )
         db.close()
     }
+
+    /**
+     * Deletes all words from the database.
+     */
+    fun clearAllWords() {
+        val db = this.writableDatabase
+        db.delete(TABLE_WORDS, null, null)
+        db.close()
+    }
 }

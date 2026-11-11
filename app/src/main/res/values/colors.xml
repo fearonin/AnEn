@@ -2,10 +2,22 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="gray">#FF9E9E9E</color>
 
-    <!-- New Calming Green Palette -->
-    <color name="green_primary">#2E7D32</color>       <!-- Main brand color (Forest Green) -->
-    <color name="green_primary_dark">#1B5E20</color>  <!-- Darker variant for active states -->
-    <color name="green_secondary">#81C784</color>     <!-- Soft green for secondary elements -->
-    <color name="green_secondary_dark">#4CAF50</color><!-- Slightly deeper secondary -->
+    <!-- Monochrome -->
+    <color name="mono_primary">#212121</color>
+    <color name="mono_secondary">#757575</color>
+
+    <!-- Cyan -->
+    <color name="cyan_primary">#00BCD4</color>
+    <color name="cyan_secondary">#0097A7</color>
+
+    <!-- Green -->
+    <color name="green_primary">#2E7D32</color>
+    <color name="green_secondary">#1B5E20</color>
+
+    <!-- Light -->
+    <color name="light_primary">#F5F5F5</color>
+    <color name="light_secondary">#E0E0E0</color>
+    <color name="light_text">#212121</color>
 </resources>

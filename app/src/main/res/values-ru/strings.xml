@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">AnEn</string>
+    <string name="service_toggle_label">Включить / Выключить сервис</string>
+    <string name="btn_grant_overlay">Дать разрешение на оверлей</string>
+    <string name="btn_grant_accessibility">Включить сервис доступности</string>
+    <string name="btn_select_app">Выбрать приложение</string>
+    <string name="btn_select_app_selected">Цель: %1$s</string>
+    <string name="btn_db_normal">База (Обычный вид)</string>
+    <string name="btn_db_raw">База (Raw формат)</string>
+    <string name="btn_export">Экспортировать</string>
+    <string name="btn_import">Импортировать</string>
+    <string name="btn_export_all">Экспортировать всё</string>
+    <string name="btn_clear_all">Очистить всё</string>
+    <string name="btn_settings">Настройки</string>
+    <string name="settings_title">Настройки</string>
+    <string name="settings_theme">Тема приложения</string>
+    <string name="theme_monochrome">Монохром (Ч/Б)</string>
+    <string name="theme_cyan">Циановая</string>
+    <string name="theme_green">Зеленая</string>
+    <string name="theme_light">Светлая</string>
+    <string name="clear_db_title">Очистить базу</string>
+    <string name="clear_db_message">Вы уверены, что хотите удалить все слова? Это действие нельзя отменить.</string>
+    <string name="btn_yes">Да, удалить</string>
+    <string name="btn_cancel">Отмена</string>
+    <!-- Остальные строки можешь перевести сам по аналогии -->
+</resources>

@@ -46,4 +46,22 @@
 
     <!-- Dialog Buttons -->
     <string name="btn_close">Close</string>
+
+    <!-- Bottom Buttons -->
+    <string name="btn_clear_all">Clear All</string>
+    <string name="btn_settings">Settings</string>
+
+    <!-- Settings Dialog -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme">App Theme</string>
+    <string name="theme_monochrome">Monochrome (B/W)</string>
+    <string name="theme_cyan">Cyan</string>
+    <string name="theme_green">Green</string>
+    <string name="theme_light">Light</string>
+
+    <!-- Clear Confirmation -->
+    <string name="clear_db_title">Clear Database</string>
+    <string name="clear_db_message">Are you sure you want to delete all words? This action cannot be undone.</string>
+    <string name="btn_yes">Yes, delete</string>
+    <string name="btn_cancel">Cancel</string>
 </resources>
