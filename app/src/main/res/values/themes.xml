@@ -2,12 +2,13 @@
     <!-- Base application theme. -->
     <style name="Theme.AnEn" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#6200EE</item>
-        <item name="colorPrimaryVariant">#3700B3</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorPrimaryVariant">@color/green_primary_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">#03DAC5</item>
-        <item name="colorSecondaryVariant">#018786</item>
-        <item name="colorOnSecondary">#000000</item>
+        <item name="colorSecondary">@color/green_secondary</item>
+        <item name="colorSecondaryVariant">@color/green_secondary_dark</item>
+        <item name="colorOnSecondary">@color/black</item>
     </style>
 </resources>

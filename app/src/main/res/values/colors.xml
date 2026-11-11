@@ -2,4 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- New Calming Green Palette -->
+    <color name="green_primary">#2E7D32</color>       <!-- Main brand color (Forest Green) -->
+    <color name="green_primary_dark">#1B5E20</color>  <!-- Darker variant for active states -->
+    <color name="green_secondary">#81C784</color>     <!-- Soft green for secondary elements -->
+    <color name="green_secondary_dark">#4CAF50</color><!-- Slightly deeper secondary -->
 </resources>
