@@ -53,32 +53,41 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
 
         try {
             swipeView = View(context).apply {
+                // Для отладки можно временно сделать зону видимой:
+                // setBackgroundColor(Color.argb(50, 255, 0, 0))
                 setBackgroundColor(Color.TRANSPARENT)
             }
 
             val isLandscape = context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+            val navBarHeight = getNavigationBarHeight(context)
 
             var gravity = Gravity.BOTTOM
             var width = WindowManager.LayoutParams.MATCH_PARENT
-            var height = dpToPx(30)
-
-            if (isLandscape) {
-                gravity = Gravity.RIGHT
-                width = dpToPx(30)
-                height = WindowManager.LayoutParams.MATCH_PARENT
-            }
+            var height = dpToPx(60) // Увеличили зону свайпа для удобства
 
             val params = WindowManager.LayoutParams(
                 width,
                 height,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT
-            ).apply {
-                this.gravity = gravity
+            )
+
+            if (isLandscape) {
+                gravity = Gravity.RIGHT
+                width = dpToPx(60) // Для альбомного режима зона справа
+                height = WindowManager.LayoutParams.MATCH_PARENT
+                params.width = width
+                params.height = height
+                // Смещаем зону влево от правого края на ширину навигационной панели
+                params.x = navBarHeight
+            } else {
+                // Портретный режим. Смещаем зону вверх от нижнего края на высоту навигационной панели
+                params.y = navBarHeight
             }
+
+            params.gravity = gravity
 
             var downX = 0f
             var downY = 0f
@@ -98,8 +107,6 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
                             if (downY - event.y > threshold) isSwipeDetected = true
                         } else if (gravity == Gravity.RIGHT) {
                             if (downX - event.x > threshold) isSwipeDetected = true
-                        } else if (gravity == Gravity.LEFT) {
-                            if (event.x - downX > threshold) isSwipeDetected = true
                         }
 
                         if (isSwipeDetected) {
@@ -284,5 +291,15 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
 
     private fun dpToPx(dp: Int): Int {
         return (dp * context.resources.displayMetrics.density).toInt()
+    }
+
+    private fun getNavigationBarHeight(context: Context): Int {
+        val resources = context.resources
+        val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        return if (resourceId > 0) {
+            resources.getDimensionPixelSize(resourceId)
+        } else {
+            (48 * resources.displayMetrics.density).toInt() // Fallback to 48dp
+        }
     }
 }
