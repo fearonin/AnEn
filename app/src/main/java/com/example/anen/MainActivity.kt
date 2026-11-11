@@ -3,21 +3,35 @@ package com.example.anen
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.EditText
+import android.widget.ScrollView
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import com.example.anen.data.DBHelper
 import com.example.anen.service.OverlayAccessibilityService
 import com.example.anen.utils.PreferencesManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.switchmaterial.SwitchMaterial
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.util.Calendar
+import java.util.Locale
 
 /**
  * Main screen of the application.
- * Handles service toggling, permission requests, and target app selection.
+ * Handles service toggling, permission requests, target app selection, and database operations.
  */
 class MainActivity : AppCompatActivity() {
 
@@ -34,6 +48,27 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dbHelper: DBHelper
     private lateinit var preferencesManager: PreferencesManager
 
+    private var pendingExportWords: List<String> = emptyList()
+    private var isExportAllMode = false
+
+    // --- ACTIVITY RESULT CONTRACTS ---
+
+    private val createDocumentLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri: Uri? ->
+        if (uri != null) {
+            writeWordsToFile(uri)
+        }
+    }
+
+    private val openDocumentLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            importWordsFromFile(uri)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -49,7 +84,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Check permissions every time the user returns to the app
         updatePermissionButtonsState()
     }
 
@@ -66,7 +100,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        // Save toggle state to preferences when clicked
         switchService.setOnCheckedChangeListener { _, isChecked ->
             preferencesManager.setServiceEnabled(isChecked)
         }
@@ -75,27 +108,197 @@ class MainActivity : AppCompatActivity() {
         btnAccessibilityPermission.setOnClickListener { openAccessibilitySettings() }
         btnSelectApp.setOnClickListener { showAppSelectionDialog() }
 
-        // Temporary stubs for Stage 6
-        btnDbNormal.setOnClickListener { showComingSoonToast() }
-        btnDbRaw.setOnClickListener { showComingSoonToast() }
-        btnExport.setOnClickListener { showComingSoonToast() }
-        btnImport.setOnClickListener { showComingSoonToast() }
-        btnExportAll.setOnClickListener { showComingSoonToast() }
+        btnDbNormal.setOnClickListener { showNormalDatabaseView() }
+        btnDbRaw.setOnClickListener { showRawDatabaseView() }
+        btnExport.setOnClickListener { handleExport(exportAll = false) }
+        btnImport.setOnClickListener { openDocumentLauncher.launch(arrayOf("text/plain")) }
+        btnExportAll.setOnClickListener { handleExport(exportAll = true) }
     }
 
-    private fun updateSwitchState() {
-        // Synchronize switch UI with saved state from PreferencesManager
-        switchService.isChecked = preferencesManager.isServiceEnabled()
+    // ==========================================
+    // --- DATABASE VIEWING LOGIC ---
+    // ==========================================
+
+    private fun showNormalDatabaseView() {
+        // Database is already sorted by created_at DESC in DBHelper
+        val words = dbHelper.getAllWords()
+        if (words.isEmpty()) {
+            Toast.makeText(this, R.string.dialog_db_empty, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val sb = StringBuilder()
+        val calendar = Calendar.getInstance()
+
+        var lastYear = -1
+        var lastMonth = -1
+        var lastDay = -1
+
+        for (word in words) {
+            calendar.timeInMillis = word.createdAt
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            // Get full month name (e.g., "November")
+            val monthName = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) ?: ""
+
+            // Add Year Header
+            if (year != lastYear) {
+                sb.append("📅 $year\n")
+                lastYear = year
+                lastMonth = -1
+                lastDay = -1
+            }
+            // Add Month Header
+            if (month != lastMonth) {
+                sb.append("    ┣ 📁 $monthName\n")
+                lastMonth = month
+                lastDay = -1
+            }
+            // Add Day Header
+            if (day != lastDay) {
+                sb.append("    ┃ ┣ 📅 $day\n")
+                lastDay = day
+            }
+            // Add the word itself
+            sb.append("    ┃ ┃ • ${word.word}\n")
+        }
+
+        // Pass 'isSelectable = true' so the user can copy the formatted text
+        showScrollableDialog(getString(R.string.dialog_db_title), sb.toString().trim(), isSelectable = true)
     }
 
-    private fun showComingSoonToast() {
-        Toast.makeText(this, R.string.toast_coming_soon, Toast.LENGTH_SHORT).show()
+    private fun showRawDatabaseView() {
+        val words = dbHelper.getAllWords()
+        if (words.isEmpty()) {
+            Toast.makeText(this, R.string.dialog_db_empty, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Raw format: words separated by newline
+        val rawText = words.joinToString("\n") { it.word }
+        showScrollableDialog(getString(R.string.dialog_db_raw_title), rawText, isSelectable = true)
     }
 
-    // --- PERMISSIONS LOGIC ---
+    private fun showScrollableDialog(title: String, content: String, isSelectable: Boolean) {
+        val textView = TextView(this).apply {
+            text = content
+            setPadding(48, 48, 48, 48)
+            textSize = 16f
+            setTextIsSelectable(isSelectable)
+        }
+
+        val scrollView = ScrollView(this).apply {
+            addView(textView)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(scrollView)
+            .setPositiveButton(R.string.btn_close, null)
+            .show()
+    }
+
+    // ==========================================
+    // --- EXPORT LOGIC ---
+    // ==========================================
+
+    private fun handleExport(exportAll: Boolean) {
+        val wordsToExport = if (exportAll) {
+            dbHelper.getAllWords()
+        } else {
+            dbHelper.getUnexportedWords()
+        }
+
+        if (wordsToExport.isEmpty()) {
+            if (!exportAll) {
+                Toast.makeText(this, R.string.toast_export_empty, Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, R.string.dialog_db_empty, Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
+
+        pendingExportWords = wordsToExport.map { it.word }
+        isExportAllMode = exportAll
+
+        val fileName = if (exportAll) "anen_all_words.txt" else "anen_new_words.txt"
+        createDocumentLauncher.launch(fileName)
+    }
+
+    private fun writeWordsToFile(uri: Uri) {
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    contentResolver.openOutputStream(uri)?.use { outputStream ->
+                        val writer = OutputStreamWriter(outputStream)
+                        writer.write(pendingExportWords.joinToString("\t"))
+                        writer.flush()
+                    }
+                }
+
+                if (!isExportAllMode) {
+                    withContext(Dispatchers.IO) {
+                        dbHelper.markAsExported(pendingExportWords)
+                    }
+                }
+
+                Toast.makeText(this@MainActivity, R.string.toast_export_success, Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this@MainActivity, R.string.toast_io_error, Toast.LENGTH_SHORT).show()
+            } finally {
+                pendingExportWords = emptyList()
+            }
+        }
+    }
+
+    // ==========================================
+    // --- IMPORT LOGIC ---
+    // ==========================================
+
+    private fun importWordsFromFile(uri: Uri) {
+        lifecycleScope.launch {
+            try {
+                val importedCount = withContext(Dispatchers.IO) {
+                    var count = 0
+                    contentResolver.openInputStream(uri)?.use { inputStream ->
+                        val reader = BufferedReader(InputStreamReader(inputStream))
+                        val content = reader.readText()
+
+                        val words = content.split(Regex("[\\t\\n\\s]+"))
+                            .map { it.trim().lowercase() }
+                            .filter { it.isNotEmpty() }
+                            .distinct()
+
+                        for (word in words) {
+                            if (dbHelper.addWord(word)) {
+                                count++
+                            }
+                        }
+                    }
+                    count
+                }
+
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.toast_import_success) + " ($importedCount new words)",
+                    Toast.LENGTH_LONG
+                ).show()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this@MainActivity, R.string.toast_io_error, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ==========================================
+    // --- PERMISSIONS & APP SELECTION ---
+    // ==========================================
 
     private fun updatePermissionButtonsState() {
-        // Overlay Permission Check
         if (Settings.canDrawOverlays(this)) {
             btnOverlayPermission.setText(R.string.overlay_granted)
             btnOverlayPermission.isEnabled = false
@@ -104,7 +307,6 @@ class MainActivity : AppCompatActivity() {
             btnOverlayPermission.isEnabled = true
         }
 
-        // Accessibility Service Check
         if (isAccessibilityServiceEnabled()) {
             btnAccessibilityPermission.setText(R.string.accessibility_granted)
             btnAccessibilityPermission.isEnabled = false
@@ -116,37 +318,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun requestOverlayPermission() {
         if (!Settings.canDrawOverlays(this)) {
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                "package:$packageName".toUri()
-            )
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, "package:$packageName".toUri())
             startActivity(intent)
         }
     }
 
     private fun openAccessibilitySettings() {
-        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-        startActivity(intent)
+        startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
     }
 
-    /**
-     * Checks if our specific AccessibilityService is currently enabled in system settings.
-     */
     private fun isAccessibilityServiceEnabled(): Boolean {
         val service = "$packageName/${OverlayAccessibilityService::class.java.canonicalName}"
-        val enabledServices = Settings.Secure.getString(
-            contentResolver,
-            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: return false
-
+        val enabledServices = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: return false
         return enabledServices.split(":").any { it.equals(service, ignoreCase = true) }
     }
 
-    // --- APP SELECTION LOGIC ---
-
     private fun showAppSelectionDialog() {
         val pm = packageManager
-        // Get all installed apps. We filter out system apps for a cleaner user experience.
         val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
             .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
 
@@ -155,7 +343,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Sort apps alphabetically by their label
         val appList = apps.map {
             val label = pm.getApplicationLabel(it).toString()
             Pair<String, String>(label, it.packageName)
@@ -166,8 +353,7 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_select_app_title)
             .setItems(appNames) { _, which ->
-                val selectedPackage = appList[which].second
-                preferencesManager.setTargetPackage(selectedPackage)
+                preferencesManager.setTargetPackage(appList[which].second)
                 updateTargetAppButton()
             }
             .setNegativeButton("Cancel", null)
@@ -176,18 +362,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateTargetAppButton() {
         val targetPackage = preferencesManager.getTargetPackage()
-
         if (targetPackage != null) {
             try {
                 val appInfo = packageManager.getApplicationInfo(targetPackage, 0)
                 val appName = packageManager.getApplicationLabel(appInfo).toString()
                 btnSelectApp.text = getString(R.string.btn_select_app_selected, appName)
             } catch (_: PackageManager.NameNotFoundException) {
-                // App was uninstalled
                 btnSelectApp.text = getString(R.string.btn_select_app)
             }
         } else {
             btnSelectApp.text = getString(R.string.btn_select_app)
         }
+    }
+
+    private fun updateSwitchState() {
+        switchService.isChecked = preferencesManager.isServiceEnabled()
     }
 }

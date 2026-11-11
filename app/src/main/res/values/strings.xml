@@ -32,4 +32,18 @@
     <!-- Overlay Input Window -->
     <string name="input_hint">Enter word...</string>
     <string name="btn_save">Save</string>
+
+    <!-- Database View Dialogs -->
+    <string name="dialog_db_title">Database (Normal View)</string>
+    <string name="dialog_db_raw_title">Database (Raw Format)</string>
+    <string name="dialog_db_empty">Database is empty</string>
+
+    <!-- Export/Import Toasts -->
+    <string name="toast_export_empty">No unexported words to save</string>
+    <string name="toast_export_success">Words exported successfully</string>
+    <string name="toast_import_success">Words imported successfully</string>
+    <string name="toast_io_error">An error occurred while handling the file</string>
+
+    <!-- Dialog Buttons -->
+    <string name="btn_close">Close</string>
 </resources>
