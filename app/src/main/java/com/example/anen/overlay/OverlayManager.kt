@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -30,6 +31,10 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
     private var inputView: View? = null
     private var isInputShowing = false
 
+    // Variables to store the origin point for the reverse animation
+    private var originTranslationX = 0f
+    private var originTranslationY = 0f
+
     companion object {
         private const val TAG = "OverlayManager"
         private const val SWIPE_THRESHOLD_DP = 20
@@ -43,7 +48,6 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
     // --- SMART INVISIBLE SWIPE AREA ---
     // ==========================================
 
-    // Callback now passes the X and Y coordinates of the finger release
     fun showOverlay(onSwipeUpDetected: (Float, Float) -> Unit) {
         if (isSwipeShowing || isInputShowing) return
 
@@ -99,7 +103,6 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
                         }
 
                         if (isSwipeDetected) {
-                            // Pass raw coordinates (relative to the whole screen) to the animation
                             onSwipeUpDetected(event.rawX, event.rawY)
                         }
                         true
@@ -143,22 +146,23 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             val editText = inputView?.findViewById<EditText>(R.id.editTextWord)
             val btnSave = inputView?.findViewById<View>(R.id.btnSaveWord)
 
-            // Hide contents initially, we will fade them in later
             editText?.alpha = 0f
             btnSave?.alpha = 0f
 
-            // Setup initial state for the animation: tiny, black, positioned at the swipe point
+            // Calculate and store the origin offset relative to the screen center
+            val displayMetrics = context.resources.displayMetrics
+            val screenCenterX = displayMetrics.widthPixels / 2f
+            val screenCenterY = displayMetrics.heightPixels / 2f
+
+            originTranslationX = endX - screenCenterX
+            originTranslationY = endY - screenCenterY
+
+            // Setup initial state for the appearance animation
             inputContainer?.apply {
                 scaleX = 0.1f
                 scaleY = 0.1f
-
-                val displayMetrics = context.resources.displayMetrics
-                val screenCenterX = displayMetrics.widthPixels / 2f
-                val screenCenterY = displayMetrics.heightPixels / 2f
-
-                // Translate the container so it starts exactly where the finger was released
-                translationX = endX - screenCenterX
-                translationY = endY - screenCenterY
+                translationX = originTranslationX
+                translationY = originTranslationY
             }
 
             val params = WindowManager.LayoutParams(
@@ -191,20 +195,18 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             windowManager?.addView(inputView, params)
             isInputShowing = true
 
-            // PLAY THE ANIMATION
+            // PLAY APPEARANCE ANIMATION
             inputContainer?.animate()
                 ?.scaleX(1f)
                 ?.scaleY(1f)
                 ?.translationX(0f)
                 ?.translationY(0f)
                 ?.setDuration(350)
-                ?.setInterpolator(DecelerateInterpolator()) // Ease-out curve
+                ?.setInterpolator(DecelerateInterpolator())
                 ?.withEndAction {
-                    // Reveal the text and button smoothly
                     editText?.animate()?.alpha(1f)?.setDuration(200)?.start()
                     btnSave?.animate()?.alpha(1f)?.setDuration(200)?.start()
 
-                    // Show keyboard AFTER the animation finishes
                     editText?.postDelayed({
                         editText.requestFocus()
                         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -237,6 +239,7 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             container?.setBackgroundResource(R.drawable.bg_input_black)
         }
 
+        // Call hide with saveAction = true to trigger the reverse animation
         hideInputWindow(saveAction = true, onWindowDismissed)
     }
 
@@ -246,25 +249,27 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(inputView?.windowToken, 0)
 
-        // Hide contents before fading out
+        val inputContainer = inputView?.findViewById<LinearLayout>(R.id.inputContainer)
         val editText = inputView?.findViewById<EditText>(R.id.editTextWord)
         val btnSave = inputView?.findViewById<View>(R.id.btnSaveWord)
-        editText?.alpha = 0f
-        btnSave?.alpha = 0f
 
-        if (saveAction) {
-            inputView?.animate()
-                ?.alpha(0f)
-                ?.setDuration(300)
-                ?.withEndAction {
-                    removeInputView()
-                    onWindowDismissed()
-                }
-                ?.start()
-        } else {
-            removeInputView()
-            onWindowDismissed()
-        }
+        // 1. Quickly fade out the text and button
+        editText?.animate()?.alpha(0f)?.setDuration(100)?.start()
+        btnSave?.animate()?.alpha(0f)?.setDuration(100)?.start()
+
+        // 2. Reverse the animation: shrink and translate back to the origin point
+        inputContainer?.animate()
+            ?.scaleX(0.1f)
+            ?.scaleY(0.1f)
+            ?.translationX(originTranslationX)
+            ?.translationY(originTranslationY)
+            ?.setDuration(250) // Slightly faster than appearance to feel snappy
+            ?.setInterpolator(AccelerateInterpolator()) // Accelerates as it shrinks away
+            ?.withEndAction {
+                removeInputView()
+                onWindowDismissed()
+            }
+            ?.start()
     }
 
     private fun removeInputView() {
