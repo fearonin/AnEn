@@ -2,11 +2,17 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="gray">#FF9E9E9E</color>
 
-    <!-- Monochrome -->
-    <color name="mono_primary">#212121</color>
-    <color name="mono_secondary">#757575</color>
+    <!-- Monochrome (Strict Black/Gray) -->
+    <color name="mono_bg">#000000</color> <!-- Absolute black for window background -->
+    <color name="mono_surface">#1E1E1E</color> <!-- Dark gray for dialogs and cards -->
+    <color name="mono_text">#FFFFFF</color> <!-- White text -->
+
+    <color name="mono_primary">#333333</color> <!-- Dark gray for filled buttons -->
+    <color name="mono_on_primary">#FFFFFF</color> <!-- White text inside buttons -->
+
+    <color name="mono_secondary">#555555</color> <!-- Medium gray for outlines/toggle -->
+    <color name="mono_on_secondary">#FFFFFF</color>
 
     <!-- Cyan -->
     <color name="cyan_primary">#00BCD4</color>
@@ -15,6 +21,14 @@
     <!-- Green -->
     <color name="green_primary">#2E7D32</color>
     <color name="green_secondary">#1B5E20</color>
+
+    <!-- Red -->
+    <color name="red_primary">#D32F2F</color>
+    <color name="red_secondary">#B71C1C</color>
+
+    <!-- Purple -->
+    <color name="purple_primary">#6200EE</color>
+    <color name="purple_secondary">#3700B3</color>
 
     <!-- Light -->
     <color name="light_primary">#F5F5F5</color>

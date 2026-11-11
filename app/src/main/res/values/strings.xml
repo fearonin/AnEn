@@ -58,10 +58,15 @@
     <string name="theme_cyan">Cyan</string>
     <string name="theme_green">Green</string>
     <string name="theme_light">Light</string>
+    <string name="theme_red">Red</string>
+    <string name="theme_purple">Purple</string>
+    <string name="btn_select_app_multiple">Target: %1$d apps</string>
 
     <!-- Clear Confirmation -->
     <string name="clear_db_title">Clear Database</string>
     <string name="clear_db_message">Are you sure you want to delete all words? This action cannot be undone.</string>
     <string name="btn_yes">Yes, delete</string>
     <string name="btn_cancel">Cancel</string>
+
+
 </resources>

@@ -45,18 +45,14 @@ class OverlayAccessibilityService : AccessibilityService() {
     }
 
     private fun evaluateOverlayState(activePackage: String) {
-        val targetPackage = preferencesManager.getTargetPackage()
+        val targetPackages = preferencesManager.getTargetPackages()
         val isServiceEnabled = preferencesManager.isServiceEnabled()
 
-        if (isServiceEnabled && activePackage == targetPackage) {
+        // Check if the currently active app is in our set of selected apps
+        if (isServiceEnabled && targetPackages.contains(activePackage)) {
             overlayManager.showOverlay { endX, endY ->
-                Log.d(TAG, "Swipe up detected at X: $endX, Y: $endY. Opening animated input window.")
-
-                // Pass the coordinates to the input window
                 overlayManager.showInputWindow(endX, endY) {
-                    Log.d(TAG, "Input window dismissed. Restoring swipe area.")
-                    if (currentPackageName == targetPackage && preferencesManager.isServiceEnabled()) {
-                        // Re-attach the swipe listener
+                    if (currentPackageName == activePackage && preferencesManager.isServiceEnabled()) {
                         overlayManager.showOverlay { x, y ->
                             overlayManager.showInputWindow(x, y) { /* Recursive callback logic */ }
                         }
@@ -68,13 +64,14 @@ class OverlayAccessibilityService : AccessibilityService() {
         }
     }
 
-    // Handle screen rotation to update the swipe area orientation
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         Log.d(TAG, "Configuration changed. Updating overlay.")
 
-        val targetPackage = preferencesManager.getTargetPackage()
-        if (currentPackageName == targetPackage && preferencesManager.isServiceEnabled()) {
+        val targetPackages = preferencesManager.getTargetPackages()
+        val activePackage = currentPackageName
+
+        if (activePackage != null && targetPackages.contains(activePackage) && preferencesManager.isServiceEnabled()) {
             overlayManager.hideOverlay()
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                 overlayManager.showOverlay { x, y ->

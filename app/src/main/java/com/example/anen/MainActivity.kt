@@ -63,13 +63,16 @@ class MainActivity : AppCompatActivity() {
     ) { uri: Uri? -> if (uri != null) importWordsFromFile(uri) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Apply theme BEFORE super.onCreate
         preferencesManager = PreferencesManager(this)
+
+        // Apply selected theme
         when (preferencesManager.getTheme()) {
             "cyan" -> setTheme(R.style.Theme_AnEn_Cyan)
             "green" -> setTheme(R.style.Theme_AnEn_Green)
+            "red" -> setTheme(R.style.Theme_AnEn_Red)
+            "purple" -> setTheme(R.style.Theme_AnEn_Purple)
             "light" -> setTheme(R.style.Theme_AnEn_Light)
-            else -> setTheme(R.style.Theme_AnEn)
+            else -> setTheme(R.style.Theme_AnEn) // Monochrome
         }
 
         super.onCreate(savedInstanceState)
@@ -136,9 +139,11 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.theme_monochrome),
             getString(R.string.theme_light),
             getString(R.string.theme_green),
-            getString(R.string.theme_cyan)
+            getString(R.string.theme_cyan),
+            getString(R.string.theme_red),
+            getString(R.string.theme_purple)
         )
-        val themeKeys = arrayOf("monochrome", "light", "green", "cyan")
+        val themeKeys = arrayOf("monochrome", "light", "green", "cyan", "red", "purple")
         val currentThemeKey = preferencesManager.getTheme()
         val currentIndex = themeKeys.indexOf(currentThemeKey)
 
@@ -149,7 +154,7 @@ class MainActivity : AppCompatActivity() {
                 if (selected != currentThemeKey) {
                     preferencesManager.setTheme(selected)
                     dialog.dismiss()
-                    recreate() // Recreate activity to apply new theme
+                    recreate()
                 } else {
                     dialog.dismiss()
                 }
@@ -158,7 +163,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ==========================================
-    // --- DATABASE VIEWING (FIXED DATE HIERARCHY) ---
+    // --- DATABASE VIEWING ---
     // ==========================================
 
     private fun showNormalDatabaseView() {
@@ -182,7 +187,6 @@ class MainActivity : AppCompatActivity() {
             val day = calendar.get(Calendar.DAY_OF_MONTH)
             val monthName = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) ?: ""
 
-            // 1. Year
             if (year != lastYear) {
                 val yearText = "$year\n"
                 val start = sb.length
@@ -194,7 +198,6 @@ class MainActivity : AppCompatActivity() {
                 lastDay = -1
             }
 
-            // 2. Month
             if (month != lastMonth) {
                 val monthText = "  📁 $monthName\n"
                 val start = sb.length
@@ -205,7 +208,6 @@ class MainActivity : AppCompatActivity() {
                 lastDay = -1
             }
 
-            // 3. Day
             if (day != lastDay) {
                 val dayText = "    $day\n"
                 val start = sb.length
@@ -215,7 +217,6 @@ class MainActivity : AppCompatActivity() {
                 lastDay = day
             }
 
-            // 4. Words (Normal size, separated by newline)
             sb.append("      ${word.word}\n")
         }
 
@@ -254,14 +255,12 @@ class MainActivity : AppCompatActivity() {
     // ==========================================
 
     private fun updatePermissionButtonsState() {
-        // Hide overlay button if granted, show if not
         if (Settings.canDrawOverlays(this)) {
             btnOverlayPermission.visibility = View.GONE
         } else {
             btnOverlayPermission.visibility = View.VISIBLE
         }
 
-        // Hide accessibility button if granted, show if not
         if (isAccessibilityServiceEnabled()) {
             btnAccessibilityPermission.visibility = View.GONE
         } else {
@@ -302,6 +301,7 @@ class MainActivity : AppCompatActivity() {
         pendingExportWords = wordsToExport.map { it.word }
         isExportAllMode = exportAll
 
+        // Changed names as requested
         val fileName = if (exportAll) "anen_all_words.txt" else "anen_new_words.txt"
         createDocumentLauncher.launch(fileName)
     }
@@ -350,36 +350,63 @@ class MainActivity : AppCompatActivity() {
 
     private fun showAppSelectionDialog() {
         val pm = packageManager
-        val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA).filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
+        val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+            .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
+
         if (apps.isEmpty()) {
             Toast.makeText(this, R.string.toast_no_apps_found, Toast.LENGTH_SHORT).show()
             return
         }
-        val appList = apps.map { Pair<String, String>(pm.getApplicationLabel(it).toString(), it.packageName) }.sortedBy { it.first }
+
+        val appList = apps.map {
+            val label = pm.getApplicationLabel(it).toString()
+            Pair<String, String>(label, it.packageName)
+        }.sortedBy { it.first }
+
         val appNames = appList.map { it.first }.toTypedArray()
+
+        // Get current selected packages and convert to mutable set for the dialog
+        val currentTargets = preferencesManager.getTargetPackages().toMutableSet()
+
+        // Create a boolean array to track checked states
+        val checkedItems = BooleanArray(appList.size) { currentTargets.contains(appList[it].second) }
 
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_select_app_title)
-            .setItems(appNames) { _, which ->
-                preferencesManager.setTargetPackage(appList[which].second)
+            .setMultiChoiceItems(appNames, checkedItems) { _, which, isChecked ->
+                val pkg = appList[which].second
+                if (isChecked) {
+                    currentTargets.add(pkg)
+                } else {
+                    currentTargets.remove(pkg)
+                }
+            }
+            .setPositiveButton(R.string.btn_close) { _, _ ->
+                // Save to preferences when clicking Done/Close
+                preferencesManager.setTargetPackages(currentTargets)
                 updateTargetAppButton()
             }
-            .setNegativeButton(R.string.btn_cancel, null)
+            .setNegativeButton(R.string.btn_cancel) { _, _ ->
+                // If cancelled, do not save changes
+            }
             .show()
     }
 
     private fun updateTargetAppButton() {
-        val targetPackage = preferencesManager.getTargetPackage()
-        if (targetPackage != null) {
+        val targetPackages = preferencesManager.getTargetPackages()
+
+        if (targetPackages.isEmpty()) {
+            btnSelectApp.text = getString(R.string.btn_select_app)
+        } else if (targetPackages.size == 1) {
             try {
-                val appInfo = packageManager.getApplicationInfo(targetPackage, 0)
+                val appInfo = packageManager.getApplicationInfo(targetPackages.first(), 0)
                 val appName = packageManager.getApplicationLabel(appInfo).toString()
                 btnSelectApp.text = getString(R.string.btn_select_app_selected, appName)
             } catch (_: PackageManager.NameNotFoundException) {
                 btnSelectApp.text = getString(R.string.btn_select_app)
             }
         } else {
-            btnSelectApp.text = getString(R.string.btn_select_app)
+            btnSelectApp.text = getString(R.string.btn_select_app_multiple, targetPackages.size)
         }
     }
 

@@ -1,26 +1,70 @@
 <resources>
     <string name="app_name">AnEn</string>
+
+    <!-- Main Screen -->
     <string name="service_toggle_label">Включить / Выключить сервис</string>
-    <string name="btn_grant_overlay">Дать разрешение на оверлей</string>
-    <string name="btn_grant_accessibility">Включить сервис доступности</string>
-    <string name="btn_select_app">Выбрать приложение</string>
+    <string name="btn_grant_overlay">Разрешить наложение поверх окон</string>
+    <string name="btn_grant_accessibility">Включить службу доступности</string>
+    <string name="btn_select_app">Выбрать целевое приложение</string>
     <string name="btn_select_app_selected">Цель: %1$s</string>
-    <string name="btn_db_normal">База (Обычный вид)</string>
-    <string name="btn_db_raw">База (Raw формат)</string>
+
+    <!-- Database Actions -->
+    <string name="btn_db_normal">База данных (Обычный вид)</string>
+    <string name="btn_db_raw">База данных (Raw формат)</string>
     <string name="btn_export">Экспортировать</string>
     <string name="btn_import">Импортировать</string>
     <string name="btn_export_all">Экспортировать всё</string>
+
+    <!-- Dialogs and Toasts -->
+    <string name="dialog_select_app_title">Выберите целевое приложение</string>
+    <string name="toast_no_apps_found">Подходящих приложений не найдено</string>
+    <string name="toast_need_permissions">Пожалуйста, сначала предоставьте разрешения</string>
+    <string name="toast_coming_soon">Эта функция будет реализована на следующем этапе</string>
+
+    <!-- Accessibility Service -->
+    <string name="accessibility_service_label">Служба наложения AnEn</string>
+    <string name="accessibility_service_description">Эта служба определяет активное приложение для отображения окна сохранения слов.</string>
+
+    <!-- Permission Status -->
+    <string name="overlay_granted">Разрешение на оверлей получено ✓</string>
+    <string name="accessibility_granted">Служба доступности включена ✓</string>
+
+    <!-- Overlay Input Window -->
+    <string name="input_hint">Введите слово...</string>
+    <string name="btn_save">Сохранить</string>
+
+    <!-- Database View Dialogs -->
+    <string name="dialog_db_title">База данных (Обычный вид)</string>
+    <string name="dialog_db_raw_title">База данных (Raw формат)</string>
+    <string name="dialog_db_empty">База данных пуста</string>
+
+    <!-- Export/Import Toasts -->
+    <string name="toast_export_empty">Нет неэкспортированных слов для сохранения</string>
+    <string name="toast_export_success">Слова успешно экспортированы</string>
+    <string name="toast_import_success">Слова успешно импортированы</string>
+    <string name="toast_io_error">Произошла ошибка при работе с файлом</string>
+
+    <!-- Dialog Buttons -->
+    <string name="btn_close">Закрыть</string>
+
+    <!-- Bottom Buttons -->
     <string name="btn_clear_all">Очистить всё</string>
     <string name="btn_settings">Настройки</string>
+
+    <!-- Settings Dialog -->
     <string name="settings_title">Настройки</string>
     <string name="settings_theme">Тема приложения</string>
-    <string name="theme_monochrome">Монохром (Ч/Б)</string>
+    <string name="theme_monochrome">Монохромная (Ч/Б)</string>
     <string name="theme_cyan">Циановая</string>
     <string name="theme_green">Зеленая</string>
     <string name="theme_light">Светлая</string>
-    <string name="clear_db_title">Очистить базу</string>
+    <string name="theme_red">Красная</string>
+    <string name="theme_purple">Фиолетовая</string>
+    <string name="btn_select_app_multiple">Цели: %1$d прил.</string>
+
+    <!-- Clear Confirmation -->
+    <string name="clear_db_title">Очистить базу данных</string>
     <string name="clear_db_message">Вы уверены, что хотите удалить все слова? Это действие нельзя отменить.</string>
     <string name="btn_yes">Да, удалить</string>
     <string name="btn_cancel">Отмена</string>
-    <!-- Остальные строки можешь перевести сам по аналогии -->
 </resources>
