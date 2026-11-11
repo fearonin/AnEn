@@ -1,5 +1,31 @@
 <resources>
     <string name="app_name">AnEn</string>
+
+    <!-- Main Screen -->
+    <string name="service_toggle_label">Enable / Disable Service</string>
+    <string name="btn_grant_overlay">Grant Overlay Permission</string>
+    <string name="btn_grant_accessibility">Enable Accessibility Service</string>
+    <string name="btn_select_app">Select Target App</string>
+    <string name="btn_select_app_selected">Target: %1$s</string>
+
+    <!-- Database Actions -->
+    <string name="btn_db_normal">Database (Normal View)</string>
+    <string name="btn_db_raw">Database (Raw Format)</string>
+    <string name="btn_export">Export</string>
+    <string name="btn_import">Import</string>
+    <string name="btn_export_all">Export All</string>
+
+    <!-- Dialogs and Toasts -->
+    <string name="dialog_select_app_title">Select target application</string>
+    <string name="toast_no_apps_found">No suitable apps found</string>
+    <string name="toast_need_permissions">Please grant permissions first</string>
+    <string name="toast_coming_soon">This feature will be implemented in the next stage</string>
+
+    <!-- Accessibility Service -->
     <string name="accessibility_service_label">AnEn Overlay Service</string>
     <string name="accessibility_service_description">This service detects the active app to display the word-saving overlay.</string>
+
+    <!-- Permission Status -->
+    <string name="overlay_granted">Overlay Permission Granted ✓</string>
+    <string name="accessibility_granted">Accessibility Service Enabled ✓</string>
 </resources>
