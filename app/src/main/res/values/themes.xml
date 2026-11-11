@@ -1,54 +1,96 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- DEFAULT: Monochrome (Strict B/G) -->
+    <!-- DEFAULT: Monochrome -->
     <style name="Theme.AnEn" parent="Theme.Material3.Dark.NoActionBar">
-        <!-- Buttons & Accents -->
         <item name="colorPrimary">@color/mono_primary</item>
-        <item name="colorOnPrimary">@color/mono_on_primary</item>
-        <item name="colorPrimaryContainer">@color/mono_primary</item>
-        <item name="colorOnPrimaryContainer">@color/mono_on_primary</item>
-
-        <!-- Secondary Elements -->
+        <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/mono_secondary</item>
-        <item name="colorOnSecondary">@color/mono_on_secondary</item>
-
-        <!-- Backgrounds & Text -->
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorTertiary">@color/mono_secondary</item>
         <item name="colorSurface">@color/mono_surface</item>
-        <item name="colorOnSurface">@color/mono_text</item>
-        <item name="android:windowBackground">@color/mono_bg</item>
-
-        <!-- Control Lines (Dividers) -->
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorSurfaceVariant">@color/mono_primary</item>
+        <item name="colorOnSurfaceVariant">@color/white</item>
         <item name="colorOutline">@color/mono_secondary</item>
+        <item name="android:windowBackground">@color/mono_bg</item>
     </style>
 
+    <!-- CYAN -->
     <style name="Theme.AnEn.Cyan" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/cyan_primary</item>
+        <item name="colorOnPrimary">@color/black</item>
         <item name="colorSecondary">@color/cyan_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorTertiary">@color/cyan_secondary</item>
+        <item name="colorSurface">@color/dark_gray</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorSurfaceVariant">@color/cyan_secondary</item>
+        <item name="colorOnSurfaceVariant">@color/white</item>
+        <item name="colorOutline">@color/cyan_secondary</item>
         <item name="android:windowBackground">@color/black</item>
     </style>
 
+    <!-- GREEN -->
     <style name="Theme.AnEn.Green" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/green_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorTertiary">@color/green_secondary</item>
+        <item name="colorSurface">@color/dark_gray</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorSurfaceVariant">@color/green_secondary</item>
+        <item name="colorOnSurfaceVariant">@color/white</item>
+        <item name="colorOutline">@color/green_secondary</item>
         <item name="android:windowBackground">@color/black</item>
     </style>
 
+    <!-- RED -->
     <style name="Theme.AnEn.Red" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/red_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/red_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorTertiary">@color/red_secondary</item>
+        <item name="colorSurface">@color/dark_gray</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorSurfaceVariant">@color/red_secondary</item>
+        <item name="colorOnSurfaceVariant">@color/white</item>
+        <item name="colorOutline">@color/red_secondary</item>
         <item name="android:windowBackground">@color/black</item>
     </style>
 
+    <!-- PURPLE -->
     <style name="Theme.AnEn.Purple" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/purple_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/purple_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorTertiary">@color/purple_secondary</item>
+        <item name="colorSurface">@color/dark_gray</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorSurfaceVariant">@color/purple_secondary</item>
+        <item name="colorOnSurfaceVariant">@color/white</item>
+        <item name="colorOutline">@color/purple_secondary</item>
         <item name="android:windowBackground">@color/black</item>
     </style>
 
+    <!-- LIGHT -->
     <style name="Theme.AnEn.Light" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/light_primary</item>
+        <item name="colorPrimary">@color/dark_gray</item>
+        <item name="colorOnPrimary">@color/white</item>
+
         <item name="colorSecondary">@color/light_secondary</item>
-        <item name="colorOnPrimary">@color/light_text</item>
-        <item name="android:windowBackground">@color/white</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorTertiary">@color/dark_gray</item>
+
+        <item name="colorSurface">@color/light_surface</item>
+        <item name="colorOnSurface">@color/black</item>
+
+        <item name="colorSurfaceVariant">@color/light_secondary</item>
+        <item name="colorOnSurfaceVariant">@color/black</item>
+
+        <item name="colorOutline">@color/dark_gray</item>
+        <item name="android:windowBackground">@color/light_bg</item>
     </style>
 </resources>

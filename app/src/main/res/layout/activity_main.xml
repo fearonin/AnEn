@@ -32,7 +32,9 @@
             android:layout_height="wrap_content"
             android:text="@string/service_toggle_label"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:thumbTint="@color/switch_thumb"
+            app:trackTint="@color/switch_track" />
 
         <View
             android:layout_width="match_parent"

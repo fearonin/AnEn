@@ -31,7 +31,9 @@ import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -65,14 +67,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         preferencesManager = PreferencesManager(this)
 
-        // Apply selected theme
         when (preferencesManager.getTheme()) {
             "cyan" -> setTheme(R.style.Theme_AnEn_Cyan)
             "green" -> setTheme(R.style.Theme_AnEn_Green)
             "red" -> setTheme(R.style.Theme_AnEn_Red)
             "purple" -> setTheme(R.style.Theme_AnEn_Purple)
             "light" -> setTheme(R.style.Theme_AnEn_Light)
-            else -> setTheme(R.style.Theme_AnEn) // Monochrome
+            else -> setTheme(R.style.Theme_AnEn)
         }
 
         super.onCreate(savedInstanceState)
@@ -119,22 +120,23 @@ class MainActivity : AppCompatActivity() {
         btnImport.setOnClickListener { openDocumentLauncher.launch(arrayOf("text/plain")) }
         btnExportAll.setOnClickListener { handleExport(exportAll = true) }
         btnClearAll.setOnClickListener { showClearDatabaseDialog() }
-        btnSettings.setOnClickListener { showSettingsDialog() }
+        btnSettings.setOnClickListener { showSettingsMenu() }
     }
 
-    private fun showClearDatabaseDialog() {
+    private fun showSettingsMenu() {
+        val options = arrayOf(getString(R.string.settings_theme), getString(R.string.settings_about))
         AlertDialog.Builder(this)
-            .setTitle(R.string.clear_db_title)
-            .setMessage(R.string.clear_db_message)
-            .setPositiveButton(R.string.btn_yes) { _, _ ->
-                dbHelper.clearAllWords()
-                Toast.makeText(this, "Database cleared", Toast.LENGTH_SHORT).show()
+            .setTitle(R.string.settings_menu_title)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> showThemeDialog()
+                    1 -> showAboutDialog()
+                }
             }
-            .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
 
-    private fun showSettingsDialog() {
+    private fun showThemeDialog() {
         val themes = arrayOf(
             getString(R.string.theme_monochrome),
             getString(R.string.theme_light),
@@ -159,6 +161,37 @@ class MainActivity : AppCompatActivity() {
                     dialog.dismiss()
                 }
             }
+            .show()
+    }
+
+    private fun showAboutDialog() {
+        // Constructing a clean, spaced-out message
+        val message = """
+            ${getString(R.string.about_version)}
+            
+            ${getString(R.string.about_description)}
+            
+            ${getString(R.string.about_license)}
+            
+            ${getString(R.string.about_license_text)}
+        """.trimIndent()
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.about_title)
+            .setMessage(message)
+            .setPositiveButton(R.string.btn_close, null)
+            .show()
+    }
+
+    private fun showClearDatabaseDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.clear_db_title)
+            .setMessage(R.string.clear_db_message)
+            .setPositiveButton(R.string.btn_yes) { _, _ ->
+                dbHelper.clearAllWords()
+                Toast.makeText(this, "Database cleared", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
 
@@ -251,7 +284,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ==========================================
-    // --- PERMISSIONS (UI FIX) ---
+    // --- PERMISSIONS ---
     // ==========================================
 
     private fun updatePermissionButtonsState() {
@@ -301,8 +334,10 @@ class MainActivity : AppCompatActivity() {
         pendingExportWords = wordsToExport.map { it.word }
         isExportAllMode = exportAll
 
-        // Changed names as requested
-        val fileName = if (exportAll) "anen_all_words.txt" else "anen_new_words.txt"
+        // Dynamic file naming with date
+        val dateStr = SimpleDateFormat("dd_MM_yyyy", Locale.getDefault()).format(Date())
+        val fileName = if (exportAll) "anen_all_words_$dateStr.txt" else "anen_$dateStr.txt"
+
         createDocumentLauncher.launch(fileName)
     }
 
@@ -365,30 +400,20 @@ class MainActivity : AppCompatActivity() {
 
         val appNames = appList.map { it.first }.toTypedArray()
 
-        // Get current selected packages and convert to mutable set for the dialog
         val currentTargets = preferencesManager.getTargetPackages().toMutableSet()
-
-        // Create a boolean array to track checked states
         val checkedItems = BooleanArray(appList.size) { currentTargets.contains(appList[it].second) }
 
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_select_app_title)
             .setMultiChoiceItems(appNames, checkedItems) { _, which, isChecked ->
                 val pkg = appList[which].second
-                if (isChecked) {
-                    currentTargets.add(pkg)
-                } else {
-                    currentTargets.remove(pkg)
-                }
+                if (isChecked) currentTargets.add(pkg) else currentTargets.remove(pkg)
             }
             .setPositiveButton(R.string.btn_close) { _, _ ->
-                // Save to preferences when clicking Done/Close
                 preferencesManager.setTargetPackages(currentTargets)
                 updateTargetAppButton()
             }
-            .setNegativeButton(R.string.btn_cancel) { _, _ ->
-                // If cancelled, do not save changes
-            }
+            .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
 

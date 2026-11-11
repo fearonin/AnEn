@@ -53,7 +53,6 @@
 
     <!-- Settings Dialog -->
     <string name="settings_title">Настройки</string>
-    <string name="settings_theme">Тема приложения</string>
     <string name="theme_monochrome">Монохромная (Ч/Б)</string>
     <string name="theme_cyan">Циановая</string>
     <string name="theme_green">Зеленая</string>
@@ -67,4 +66,16 @@
     <string name="clear_db_message">Вы уверены, что хотите удалить все слова? Это действие нельзя отменить.</string>
     <string name="btn_yes">Да, удалить</string>
     <string name="btn_cancel">Отмена</string>
+
+    <!-- Settings Menu -->
+    <string name="settings_menu_title">Настройки</string>
+    <string name="settings_theme">Тема приложения</string>
+    <string name="settings_about">О приложении</string>
+
+    <!-- About Dialog -->
+    <string name="about_title">О приложении AnEn</string>
+    <string name="about_version">Версия 1.0</string>
+    <string name="about_description">Удобный инструмент для быстрого сохранения слов</string>
+    <string name="about_license">Лицензия</string>
+    <string name="about_license_text">Это приложение распространяется под лицензией MIT.</string>
 </resources>

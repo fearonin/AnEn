@@ -2,17 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="dark_gray">#212121</color>
+    <color name="light_gray">#E0E0E0</color>
 
-    <!-- Monochrome (Strict Black/Gray) -->
-    <color name="mono_bg">#000000</color> <!-- Absolute black for window background -->
-    <color name="mono_surface">#1E1E1E</color> <!-- Dark gray for dialogs and cards -->
-    <color name="mono_text">#FFFFFF</color> <!-- White text -->
-
-    <color name="mono_primary">#333333</color> <!-- Dark gray for filled buttons -->
-    <color name="mono_on_primary">#FFFFFF</color> <!-- White text inside buttons -->
-
-    <color name="mono_secondary">#555555</color> <!-- Medium gray for outlines/toggle -->
-    <color name="mono_on_secondary">#FFFFFF</color>
+    <!-- Monochrome (Strict B/G) -->
+    <color name="mono_bg">#000000</color>
+    <color name="mono_surface">#1E1E1E</color>
+    <color name="mono_primary">#333333</color>
+    <color name="mono_secondary">#555555</color>
 
     <!-- Cyan -->
     <color name="cyan_primary">#00BCD4</color>
@@ -30,8 +27,9 @@
     <color name="purple_primary">#6200EE</color>
     <color name="purple_secondary">#3700B3</color>
 
-    <!-- Light -->
-    <color name="light_primary">#F5F5F5</color>
-    <color name="light_secondary">#E0E0E0</color>
-    <color name="light_text">#212121</color>
+    <!-- Light Theme -->
+    <color name="light_bg">#F5F5F5</color>
+    <color name="light_surface">#FFFFFF</color>
+    <color name="light_primary">#E0E0E0</color>
+    <color name="light_secondary">#BDBDBD</color>
 </resources>
