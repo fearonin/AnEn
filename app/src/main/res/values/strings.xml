@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AnEn</string>
+    <string name="accessibility_service_label">AnEn Overlay Service</string>
+    <string name="accessibility_service_description">This service detects the active app to display the word-saving overlay.</string>
 </resources>
