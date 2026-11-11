@@ -1,4 +1,3 @@
-```markdown
 # AnEn - Seamless English Vocabulary Saver
 
 ![Build Debug APK](https://github.com/fearonin/AnEn/actions/workflows/build.yml/badge.svg)
