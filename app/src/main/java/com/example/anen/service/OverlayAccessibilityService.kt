@@ -49,14 +49,16 @@ class OverlayAccessibilityService : AccessibilityService() {
         val isServiceEnabled = preferencesManager.isServiceEnabled()
 
         if (isServiceEnabled && activePackage == targetPackage) {
-            overlayManager.showOverlay {
-                Log.d(TAG, "Swipe up detected! Opening input window.")
+            overlayManager.showOverlay { endX, endY ->
+                Log.d(TAG, "Swipe up detected at X: $endX, Y: $endY. Opening animated input window.")
 
-                overlayManager.showInputWindow {
+                // Pass the coordinates to the input window
+                overlayManager.showInputWindow(endX, endY) {
                     Log.d(TAG, "Input window dismissed. Restoring swipe area.")
                     if (currentPackageName == targetPackage && preferencesManager.isServiceEnabled()) {
-                        overlayManager.showOverlay {
-                            overlayManager.showInputWindow { /* Recursive callback logic */ }
+                        // Re-attach the swipe listener
+                        overlayManager.showOverlay { x, y ->
+                            overlayManager.showInputWindow(x, y) { /* Recursive callback logic */ }
                         }
                     }
                 }
@@ -74,12 +76,11 @@ class OverlayAccessibilityService : AccessibilityService() {
         val targetPackage = preferencesManager.getTargetPackage()
         if (currentPackageName == targetPackage && preferencesManager.isServiceEnabled()) {
             overlayManager.hideOverlay()
-            // Increased delay to allow the system to finish rotating
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                overlayManager.showOverlay {
-                    overlayManager.showInputWindow { /* Restore logic */ }
+                overlayManager.showOverlay { x, y ->
+                    overlayManager.showInputWindow(x, y) { /* Restore logic */ }
                 }
-            }, 800)
+            }, 500)
         }
     }
 

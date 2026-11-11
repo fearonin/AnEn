@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -18,7 +19,6 @@ import android.widget.LinearLayout
 import androidx.appcompat.view.ContextThemeWrapper
 import com.example.anen.R
 import com.example.anen.data.DBHelper
-import kotlin.math.abs
 
 class OverlayManager(private val context: Context, private val dbHelper: DBHelper) {
 
@@ -32,7 +32,6 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
 
     companion object {
         private const val TAG = "OverlayManager"
-        // Reduced threshold, as the landscape view is only 30dp wide
         private const val SWIPE_THRESHOLD_DP = 20
     }
 
@@ -44,7 +43,8 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
     // --- SMART INVISIBLE SWIPE AREA ---
     // ==========================================
 
-    fun showOverlay(onSwipeUpDetected: () -> Unit) {
+    // Callback now passes the X and Y coordinates of the finger release
+    fun showOverlay(onSwipeUpDetected: (Float, Float) -> Unit) {
         if (isSwipeShowing || isInputShowing) return
 
         try {
@@ -52,7 +52,6 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
                 setBackgroundColor(Color.TRANSPARENT)
             }
 
-            // Use configuration orientation for more reliable detection
             val isLandscape = context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
             var gravity = Gravity.BOTTOM
@@ -60,8 +59,6 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             var height = dpToPx(30)
 
             if (isLandscape) {
-                // For simplicity, attach to RIGHT edge in landscape.
-                // (You can add logic to detect ROTATION_270 for LEFT edge if needed)
                 gravity = Gravity.RIGHT
                 width = dpToPx(30)
                 height = WindowManager.LayoutParams.MATCH_PARENT
@@ -85,30 +82,26 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             swipeView?.setOnTouchListener { _, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        // Use local coordinates (event.x, event.y) instead of rawX/rawY
                         downX = event.x
                         downY = event.y
                         true
                     }
                     MotionEvent.ACTION_UP -> {
-                        val deltaX = event.x - downX
-                        val deltaY = event.y - downY
                         val threshold = dpToPx(SWIPE_THRESHOLD_DP)
-
                         var isSwipeDetected = false
 
                         if (gravity == Gravity.BOTTOM) {
-                            // Swipe up (Y decreases)
                             if (downY - event.y > threshold) isSwipeDetected = true
                         } else if (gravity == Gravity.RIGHT) {
-                            // Swipe left (X decreases)
                             if (downX - event.x > threshold) isSwipeDetected = true
                         } else if (gravity == Gravity.LEFT) {
-                            // Swipe right (X increases)
                             if (event.x - downX > threshold) isSwipeDetected = true
                         }
 
-                        if (isSwipeDetected) onSwipeUpDetected()
+                        if (isSwipeDetected) {
+                            // Pass raw coordinates (relative to the whole screen) to the animation
+                            onSwipeUpDetected(event.rawX, event.rawY)
+                        }
                         true
                     }
                     else -> false
@@ -134,10 +127,10 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
     }
 
     // ==========================================
-    // --- INPUT WINDOW OVERLAY ---
+    // --- INPUT WINDOW OVERLAY (WITH ANIMATION) ---
     // ==========================================
 
-    fun showInputWindow(onWindowDismissed: () -> Unit) {
+    fun showInputWindow(endX: Float, endY: Float, onWindowDismissed: () -> Unit) {
         if (isInputShowing) return
         hideOverlay()
 
@@ -146,8 +139,27 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             inputView = LayoutInflater.from(themedContext).inflate(R.layout.dialog_input, null)
 
             val rootLayout = inputView?.findViewById<FrameLayout>(R.id.rootOverlayLayout)
+            val inputContainer = inputView?.findViewById<LinearLayout>(R.id.inputContainer)
             val editText = inputView?.findViewById<EditText>(R.id.editTextWord)
             val btnSave = inputView?.findViewById<View>(R.id.btnSaveWord)
+
+            // Hide contents initially, we will fade them in later
+            editText?.alpha = 0f
+            btnSave?.alpha = 0f
+
+            // Setup initial state for the animation: tiny, black, positioned at the swipe point
+            inputContainer?.apply {
+                scaleX = 0.1f
+                scaleY = 0.1f
+
+                val displayMetrics = context.resources.displayMetrics
+                val screenCenterX = displayMetrics.widthPixels / 2f
+                val screenCenterY = displayMetrics.heightPixels / 2f
+
+                // Translate the container so it starts exactly where the finger was released
+                translationX = endX - screenCenterX
+                translationY = endY - screenCenterY
+            }
 
             val params = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -158,8 +170,7 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
                 PixelFormat.TRANSLUCENT
             ).apply {
                 gravity = Gravity.CENTER
-                softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or
-                        WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
+                softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
             }
 
             rootLayout?.setOnClickListener {
@@ -180,11 +191,27 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             windowManager?.addView(inputView, params)
             isInputShowing = true
 
-            editText?.postDelayed({
-                editText.requestFocus()
-                val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
-            }, 200)
+            // PLAY THE ANIMATION
+            inputContainer?.animate()
+                ?.scaleX(1f)
+                ?.scaleY(1f)
+                ?.translationX(0f)
+                ?.translationY(0f)
+                ?.setDuration(350)
+                ?.setInterpolator(DecelerateInterpolator()) // Ease-out curve
+                ?.withEndAction {
+                    // Reveal the text and button smoothly
+                    editText?.animate()?.alpha(1f)?.setDuration(200)?.start()
+                    btnSave?.animate()?.alpha(1f)?.setDuration(200)?.start()
+
+                    // Show keyboard AFTER the animation finishes
+                    editText?.postDelayed({
+                        editText.requestFocus()
+                        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+                    }, 100)
+                }
+                ?.start()
 
         } catch (e: Exception) {
             Log.e(TAG, "Error showing input window: ${e.message}")
@@ -218,6 +245,12 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
 
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(inputView?.windowToken, 0)
+
+        // Hide contents before fading out
+        val editText = inputView?.findViewById<EditText>(R.id.editTextWord)
+        val btnSave = inputView?.findViewById<View>(R.id.btnSaveWord)
+        editText?.alpha = 0f
+        btnSave?.alpha = 0f
 
         if (saveAction) {
             inputView?.animate()
