@@ -5,11 +5,11 @@
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9.22-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-**AnEn** is a lightweight, native Android utility designed to help you seamlessly save unfamiliar English words while reading in browsers, e-readers, or any other app. It features a swipe-to-save overlay and provides seamless export to **Anki** flashcards.
+**AnEn** is a lightweight, native Android utility designed to help you seamlessly save unfamiliar English words(and more) while reading in browsers, e-readers, or any other app. It features a swipe-to-save overlay and provides seamless export to flashcard apps.
 
 ## ✨ Features
 
-*   **Invisible Swipe Overlay:** Triggers an input window by swiping up from the navigationgit status bar, overlaid on top of your chosen apps.
+*   **Invisible Swipe Overlay:** Triggers an input window by swiping up from the navigation git status bar, overlaid on top of your chosen apps.
 *   **Multi-App Targeting:** Select multiple specific apps (e.g., your favorite reader and browser) where the overlay should be active.
 *   **Smart Animations:** The input window appears and disappears smoothly, following the trajectory of your swipe.
 *   **Offline Database:** Uses a local SQLite database to store words, timestamps, and export statuses.
@@ -62,4 +62,3 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 ## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) file for details.
-```
