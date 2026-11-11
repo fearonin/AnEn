@@ -1,19 +1,18 @@
 package com.example.anen.service
 
 import android.accessibilityservice.AccessibilityService
+import android.content.res.Configuration
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import com.example.anen.data.DBHelper
 import com.example.anen.overlay.OverlayManager
 import com.example.anen.utils.PreferencesManager
 
-/**
- * Accessibility Service responsible for detecting the currently active application.
- * This allows the app to show the invisible swipe area only over the user's chosen target app.
- */
 class OverlayAccessibilityService : AccessibilityService() {
 
     private lateinit var preferencesManager: PreferencesManager
     private lateinit var overlayManager: OverlayManager
+    private lateinit var dbHelper: DBHelper
     private var currentPackageName: String? = null
 
     companion object {
@@ -23,23 +22,21 @@ class OverlayAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         preferencesManager = PreferencesManager(this)
-        overlayManager = OverlayManager(this)
+        dbHelper = DBHelper(this)
+        overlayManager = OverlayManager(this, dbHelper)
         Log.d(TAG, "Accessibility Service Connected")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
 
-        // Listen only for window state changes (switching apps)
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val packageName = event.packageName?.toString() ?: return
 
-            // Ignore system UI and our own app to prevent loops
             if (packageName == "com.android.systemui" || packageName == applicationContext.packageName) {
                 return
             }
 
-            // Only act if the active window changed
             if (currentPackageName != packageName) {
                 currentPackageName = packageName
                 evaluateOverlayState(packageName)
@@ -47,22 +44,42 @@ class OverlayAccessibilityService : AccessibilityService() {
         }
     }
 
-    /**
-     * Determines if the overlay should be shown based on the active package.
-     */
     private fun evaluateOverlayState(activePackage: String) {
         val targetPackage = preferencesManager.getTargetPackage()
         val isServiceEnabled = preferencesManager.isServiceEnabled()
 
         if (isServiceEnabled && activePackage == targetPackage) {
-            // We are in the target app and the service is enabled -> Show overlay
             overlayManager.showOverlay {
-                // TODO: In Stage 5, we will open the input window here.
-                Log.d(TAG, "Swipe up detected in target app!")
+                Log.d(TAG, "Swipe up detected! Opening input window.")
+
+                overlayManager.showInputWindow {
+                    Log.d(TAG, "Input window dismissed. Restoring swipe area.")
+                    if (currentPackageName == targetPackage && preferencesManager.isServiceEnabled()) {
+                        overlayManager.showOverlay {
+                            overlayManager.showInputWindow { /* Recursive callback logic */ }
+                        }
+                    }
+                }
             }
         } else {
-            // We are in another app or service is disabled -> Hide overlay
             overlayManager.hideOverlay()
+        }
+    }
+
+    // Handle screen rotation to update the swipe area orientation
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        Log.d(TAG, "Configuration changed. Updating overlay.")
+
+        val targetPackage = preferencesManager.getTargetPackage()
+        if (currentPackageName == targetPackage && preferencesManager.isServiceEnabled()) {
+            overlayManager.hideOverlay()
+            // Increased delay to allow the system to finish rotating
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                overlayManager.showOverlay {
+                    overlayManager.showInputWindow { /* Restore logic */ }
+                }
+            }, 800)
         }
     }
 

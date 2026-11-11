@@ -28,4 +28,8 @@
     <!-- Permission Status -->
     <string name="overlay_granted">Overlay Permission Granted ✓</string>
     <string name="accessibility_granted">Accessibility Service Enabled ✓</string>
+
+    <!-- Overlay Input Window -->
+    <string name="input_hint">Enter word...</string>
+    <string name="btn_save">Save</string>
 </resources>
