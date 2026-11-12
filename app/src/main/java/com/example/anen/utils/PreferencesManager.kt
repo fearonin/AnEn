@@ -11,6 +11,7 @@ class PreferencesManager(context: Context) {
         private const val KEY_TARGET_PACKAGES = "target_packages"
         private const val KEY_SERVICE_ENABLED = "service_enabled"
         private const val KEY_THEME = "app_theme"
+        private const val KEY_INVOCATION_METHOD = "invocation_method"
     }
 
     fun setTargetPackages(packageNames: Set<String>) {
@@ -35,5 +36,13 @@ class PreferencesManager(context: Context) {
 
     fun getTheme(): String {
         return prefs.getString(KEY_THEME, "monochrome") ?: "monochrome"
+    }
+
+    fun setInvocationMethod(method: String) {
+        prefs.edit { putString(KEY_INVOCATION_METHOD, method) }
+    }
+
+    fun getInvocationMethod(): String {
+        return prefs.getString(KEY_INVOCATION_METHOD, "swipe") ?: "swipe"
     }
 }

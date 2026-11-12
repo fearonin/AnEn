@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.text.SpannableStringBuilder
@@ -12,6 +13,7 @@ import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
@@ -21,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.example.anen.data.DBHelper
+import com.example.anen.overlay.OverlayManager
 import com.example.anen.service.OverlayAccessibilityService
 import com.example.anen.utils.PreferencesManager
 import com.google.android.material.button.MaterialButton
@@ -49,6 +52,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnExportAll: MaterialButton
     private lateinit var btnClearAll: MaterialButton
     private lateinit var btnSettings: MaterialButton
+    private lateinit var btnInvocationMethod: MaterialButton
 
     private lateinit var dbHelper: DBHelper
     private lateinit var preferencesManager: PreferencesManager
@@ -84,11 +88,19 @@ class MainActivity : AppCompatActivity() {
         setupListeners()
         updateTargetAppButton()
         updateSwitchState()
+
+        // Handle intent from Quick Settings Tile (Fallback, though TileService now uses Broadcast)
+        if (intent.getBooleanExtra("SHOW_INPUT_WINDOW", false)) {
+            val overlayManager = OverlayManager(this, dbHelper)
+            overlayManager.showInputWindow(0f, 0f) { }
+            intent.removeExtra("SHOW_INPUT_WINDOW")
+        }
     }
 
     override fun onResume() {
         super.onResume()
         updatePermissionButtonsState()
+        updateUiState()
     }
 
     private fun initViews() {
@@ -103,24 +115,81 @@ class MainActivity : AppCompatActivity() {
         btnExportAll = findViewById(R.id.btnExportAll)
         btnClearAll = findViewById(R.id.btnClearAll)
         btnSettings = findViewById(R.id.btnSettings)
+        btnInvocationMethod = findViewById(R.id.btnInvocationMethod)
     }
 
     private fun setupListeners() {
         switchService.setOnCheckedChangeListener { _, isChecked ->
             preferencesManager.setServiceEnabled(isChecked)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                android.service.quicksettings.TileService.requestListeningState(
+                    this,
+                    android.content.ComponentName(this, com.example.anen.service.AddWordTileService::class.java)
+                )
+            }
         }
 
         btnOverlayPermission.setOnClickListener { requestOverlayPermission() }
         btnAccessibilityPermission.setOnClickListener { openAccessibilitySettings() }
-        btnSelectApp.setOnClickListener { showAppSelectionDialog() }
 
-        btnDbNormal.setOnClickListener { showNormalDatabaseView() }
-        btnDbRaw.setOnClickListener { showRawDatabaseView() }
-        btnExport.setOnClickListener { handleExport(exportAll = false) }
-        btnImport.setOnClickListener { openDocumentLauncher.launch(arrayOf("text/plain")) }
-        btnExportAll.setOnClickListener { handleExport(exportAll = true) }
-        btnClearAll.setOnClickListener { showClearDatabaseDialog() }
+        val checkPermissionsAndRun: (() -> Unit) -> Unit = { action ->
+            if (Settings.canDrawOverlays(this) && isAccessibilityServiceEnabled()) {
+                action()
+            } else {
+                Toast.makeText(this, "Please grant all permissions first", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnSelectApp.setOnClickListener { checkPermissionsAndRun { showAppSelectionDialog() } }
+        btnDbNormal.setOnClickListener { checkPermissionsAndRun { showNormalDatabaseView() } }
+        btnDbRaw.setOnClickListener { checkPermissionsAndRun { showRawDatabaseView() } }
+        btnExport.setOnClickListener { checkPermissionsAndRun { handleExport(exportAll = false) } }
+        btnImport.setOnClickListener { checkPermissionsAndRun { openDocumentLauncher.launch(arrayOf("text/plain")) } }
+        btnExportAll.setOnClickListener { checkPermissionsAndRun { handleExport(exportAll = true) } }
+        btnClearAll.setOnClickListener { checkPermissionsAndRun { showClearDatabaseDialog() } }
+        btnInvocationMethod.setOnClickListener { checkPermissionsAndRun { showInvocationMethodDialog() } }
+
         btnSettings.setOnClickListener { showSettingsMenu() }
+    }
+    private fun showInvocationMethodDialog() {
+        val methodKeys = arrayOf("swipe", "back_button", "tile_only")
+        val methodNames = arrayOf(
+            getString(R.string.method_swipe),
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                getString(R.string.method_back_button_unavailable)
+            } else {
+                getString(R.string.method_back_button)
+            },
+            getString(R.string.method_tile_only)
+        )
+
+        val currentMethod = preferencesManager.getInvocationMethod()
+        val currentIndex = methodKeys.indexOf(currentMethod).coerceAtLeast(0)
+
+        val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_list_item_single_choice, methodNames) {
+            override fun isEnabled(position: Int): Boolean {
+                return !(position == 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            }
+            override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+                val view = super.getView(position, convertView, parent)
+                // Visually gray out the disabled item
+                view.alpha = if (isEnabled(position)) 1f else 0.4f
+                return view
+            }
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_invocation_title)
+            .setSingleChoiceItems(adapter, currentIndex) { dialog, which ->
+                if (which == 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    Toast.makeText(this, R.string.toast_method_unavailable, Toast.LENGTH_SHORT).show()
+                    return@setSingleChoiceItems
+                }
+                preferencesManager.setInvocationMethod(methodKeys[which])
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.btn_cancel, null)
+            .show()
     }
 
     private fun showSettingsMenu() {
@@ -165,7 +234,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAboutDialog() {
-        // Constructing a clean, spaced-out message
         val message = """
             ${getString(R.string.about_version)}
             
@@ -194,10 +262,6 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
-
-    // ==========================================
-    // --- DATABASE VIEWING ---
-    // ==========================================
 
     private fun showNormalDatabaseView() {
         val words = dbHelper.getAllWords()
@@ -283,10 +347,6 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    // ==========================================
-    // --- PERMISSIONS ---
-    // ==========================================
-
     private fun updatePermissionButtonsState() {
         if (Settings.canDrawOverlays(this)) {
             btnOverlayPermission.visibility = View.GONE
@@ -313,14 +373,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun isAccessibilityServiceEnabled(): Boolean {
-        val service = "$packageName/${OverlayAccessibilityService::class.java.canonicalName}"
-        val enabledServices = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: return false
-        return enabledServices.split(":").any { it.equals(service, ignoreCase = true) }
-    }
+        val expectedService = "$packageName/${OverlayAccessibilityService::class.java.canonicalName}"
+        val enabledServices = Settings.Secure.getString(
+            contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: return false
 
-    // ==========================================
-    // --- EXPORT / IMPORT / APP SELECT ---
-    // ==========================================
+        val colonSplitter = android.text.TextUtils.SimpleStringSplitter(':')
+        colonSplitter.setString(enabledServices)
+        while (colonSplitter.hasNext()) {
+            val componentName = colonSplitter.next()
+            if (componentName.equals(expectedService, ignoreCase = true)) {
+                return true
+            }
+        }
+        return false
+    }
 
     private fun handleExport(exportAll: Boolean) {
         val wordsToExport = if (exportAll) dbHelper.getAllWords() else dbHelper.getUnexportedWords()
@@ -334,7 +402,6 @@ class MainActivity : AppCompatActivity() {
         pendingExportWords = wordsToExport.map { it.word }
         isExportAllMode = exportAll
 
-        // Dynamic file naming with date
         val dateStr = SimpleDateFormat("dd_MM_yyyy", Locale.getDefault()).format(Date())
         val fileName = if (exportAll) "anen_all_words_$dateStr.txt" else "anen_$dateStr.txt"
 
@@ -438,4 +505,23 @@ class MainActivity : AppCompatActivity() {
     private fun updateSwitchState() {
         switchService.isChecked = preferencesManager.isServiceEnabled()
     }
+
+    private fun updateUiState() {
+        val hasOverlay = Settings.canDrawOverlays(this)
+        val hasAccessibility = isAccessibilityServiceEnabled()
+        val allPermissionsGranted = hasOverlay && hasAccessibility
+
+        val alphaValue = if (allPermissionsGranted) 1.0f else 0.4f
+
+        // List of UI elements that require permissions
+        val restrictedViews = listOf(
+            btnSelectApp, btnDbNormal, btnDbRaw, btnExport, btnImport, btnExportAll, btnClearAll, btnInvocationMethod
+        )
+
+        restrictedViews.forEach { view ->
+            view.isEnabled = allPermissionsGranted
+            view.alpha = alphaValue
+        }
+    }
+
 }

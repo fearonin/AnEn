@@ -79,4 +79,17 @@
     <string name="about_license">License</string>
     <string name="about_license_text">This application is licensed under the MIT License.</string>
 
+    <!-- Invocation Methods -->
+    <string name="btn_invocation_method">Invocation Method</string>
+    <string name="dialog_invocation_title">Select Invocation Method</string>
+    <string name="method_swipe">Swipe Up (Default)</string>
+    <string name="method_back_button">Hold Back Button (2s)</string>
+
+    <string name="method_back_button_unavailable">Hold Back Button (Unavailable)</string>
+    <string name="toast_method_unavailable">This method is not supported on your Android version. Please use Swipe or Quick Tile.</string>
+    <string name="method_tile_only">Only Settings Tile</string>
+    <string name="tile_label">Add word</string>
+    <string name="tile_description">Add a new word to AnEn</string>
+    <string name="toast_tile_not_target">Open a target app first to add a word.</string>
+
 </resources>

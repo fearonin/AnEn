@@ -78,4 +78,10 @@
     <string name="about_description">Удобный инструмент для быстрого сохранения слов</string>
     <string name="about_license">Лицензия</string>
     <string name="about_license_text">Это приложение распространяется под лицензией MIT.</string>
+
+    <!-- Invocation Methods -->
+    <string name="btn_invocation_method">Метод вызова</string>
+    <string name="dialog_invocation_title">Выберите метод вызова</string>
+    <string name="method_swipe">Свайп вверх (По умолчанию)</string>
+    <string name="method_back_button">Удержание кнопки Назад (2 сек)</string>
 </resources>

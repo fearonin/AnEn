@@ -1,5 +1,6 @@
 package com.example.anen.overlay
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
@@ -75,7 +76,7 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             )
 
             if (isLandscape) {
-                gravity = Gravity.RIGHT
+                gravity = Gravity.END
                 width = dpToPx(60) // Для альбомного режима зона справа
                 height = WindowManager.LayoutParams.MATCH_PARENT
                 params.width = width
@@ -105,7 +106,7 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
 
                         if (gravity == Gravity.BOTTOM) {
                             if (downY - event.y > threshold) isSwipeDetected = true
-                        } else if (gravity == Gravity.RIGHT) {
+                        } else if (gravity == Gravity.RIGHT || gravity == Gravity.END) {
                             if (downX - event.x > threshold) isSwipeDetected = true
                         }
 
@@ -161,8 +162,11 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             val screenCenterX = displayMetrics.widthPixels / 2f
             val screenCenterY = displayMetrics.heightPixels / 2f
 
-            originTranslationX = endX - screenCenterX
-            originTranslationY = endY - screenCenterY
+            val startX = if (endX == 0f && endY == 0f) screenCenterX else endX
+            val startY = if (endX == 0f && endY == 0f) screenCenterY + 200f else endY
+
+            originTranslationX = startX - screenCenterX
+            originTranslationY = startY - screenCenterY
 
             // Setup initial state for the appearance animation
             inputContainer?.apply {
@@ -293,6 +297,7 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
         return (dp * context.resources.displayMetrics.density).toInt()
     }
 
+    @SuppressLint("DiscouragedApi", "InternalInsetResource")
     private fun getNavigationBarHeight(context: Context): Int {
         val resources = context.resources
         val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
