@@ -14,6 +14,7 @@ import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.ListView
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.ScrollView
@@ -28,6 +29,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.anen.data.DBHelper
 import com.example.anen.service.OverlayAccessibilityService
 import com.example.anen.utils.PreferencesManager
+import com.example.anen.data.AppInfo
+import com.example.anen.utils.AppSelectionAdapter
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.switchmaterial.SwitchMaterial
 import kotlinx.coroutines.Dispatchers
@@ -621,24 +625,37 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // Map to our custom AppInfo data class, including the icon
         val appList = apps.map {
             val label = pm.getApplicationLabel(it).toString()
-            Pair<String, String>(label, it.packageName)
-        }.sortedBy { it.first }
+            val icon = pm.getApplicationIcon(it)
+            AppInfo(label, it.packageName, icon)
+        }.sortedBy { it.name }
 
-        val appNames = appList.map { it.first }.toTypedArray()
+        // Inflate custom dialog layout
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_select_app, null)
+        val etSearch = dialogView.findViewById<TextInputEditText>(R.id.etSearchApp)
+        val lvApps = dialogView.findViewById<ListView>(R.id.lvApps)
 
-        val currentTargets = preferencesManager.getTargetPackages().toMutableSet()
-        val checkedItems = BooleanArray(appList.size) { currentTargets.contains(appList[it].second) }
+        val currentTargets = preferencesManager.getTargetPackages()
+        val adapter = AppSelectionAdapter(this, appList, currentTargets)
+        lvApps.adapter = adapter
+
+        // Add text watcher for live search
+        etSearch.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                adapter.filter.filter(s)
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
 
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_select_app_title)
-            .setMultiChoiceItems(appNames, checkedItems) { _, which, isChecked ->
-                val pkg = appList[which].second
-                if (isChecked) currentTargets.add(pkg) else currentTargets.remove(pkg)
-            }
+            .setView(dialogView)
             .setPositiveButton(R.string.btn_close) { _, _ ->
-                preferencesManager.setTargetPackages(currentTargets)
+                // Save the selected packages from the adapter
+                preferencesManager.setTargetPackages(adapter.getSelectedPackages())
                 updateTargetAppButton()
             }
             .setNegativeButton(R.string.btn_cancel, null)
