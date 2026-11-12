@@ -92,4 +92,18 @@
     <string name="tile_description">Add a new word to AnEn</string>
     <string name="toast_tile_not_target">Open a target app first to add a word.</string>
 
+    <!-- Delimiters -->
+    <string name="delimiter_tab">Tab</string>
+    <string name="delimiter_pipe">Pipe (|)</string>
+    <string name="delimiter_semicolon">Semicolon (;)</string>
+    <string name="delimiter_colon">Colon (:)</string>
+    <string name="delimiter_comma">Comma (,)</string>
+    <string name="delimiter_space">Space</string>
+    <string name="delimiter_label">Delimiter</string>
+
+    <!-- Export All Dialog -->
+    <string name="export_all_title">Export All Words</string>
+    <string name="export_all_include_metadata">Include Metadata (Word History)</string>
+    <string name="export_all_warning">Metadata allows restoring word creation dates if you reinstall the app.</string>
+
 </resources>

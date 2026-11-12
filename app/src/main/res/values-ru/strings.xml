@@ -84,4 +84,18 @@
     <string name="dialog_invocation_title">Выберите метод вызова</string>
     <string name="method_swipe">Свайп вверх (По умолчанию)</string>
     <string name="method_back_button">Удержание кнопки Назад (2 сек)</string>
+
+    <!-- Delimiters -->
+    <string name="delimiter_tab">Табуляция</string>
+    <string name="delimiter_pipe">Вертикальная черта (|)</string>
+    <string name="delimiter_semicolon">Точка с запятой (;)</string>
+    <string name="delimiter_colon">Двоеточие (:)</string>
+    <string name="delimiter_comma">Запятая (,)</string>
+    <string name="delimiter_space">Пробел</string>
+    <string name="delimiter_label">Разделитель</string>
+
+    <!-- Export All Dialog -->
+    <string name="export_all_title">Экспорт всех слов</string>
+    <string name="export_all_include_metadata">Включить метаданные (История)</string>
+    <string name="export_all_warning">Метаданные позволяют восстановить даты добавления слов при переустановке приложения.</string>
 </resources>
