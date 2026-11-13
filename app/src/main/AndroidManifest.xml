@@ -18,7 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AnEn"
-        tools:targetApi="31">
+        android:localeConfig="@xml/locales_config"
+        tools:targetApi="33">
 
         <activity
             android:name=".MainActivity"
@@ -56,7 +57,7 @@
         <service
             android:name=".service.AddWordTileService"
             android:exported="true"
-            android:icon="@drawable/ic_launcher_foreground"
+            android:icon="@drawable/ic_tile_padded"
             android:label="@string/tile_label"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
@@ -64,8 +65,15 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".OnboardingActivity" android:exported="false" />
-        <activity android:name=".WorkingLanguagesActivity" android:exported="false" />
+        <activity android:name=".GeneralSettingsActivity" android:exported="false" />
         <activity android:name=".WorkingSourcesActivity" android:exported="false" />
+        <activity android:name=".WorkingLanguagesActivity" android:exported="false" />
+        <activity android:name=".WordManagerActivity" android:exported="false" />
+
+        <service android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data android:name="autoStoreLocales" android:value="true" />
+        </service>
     </application>
 </manifest>

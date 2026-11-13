@@ -1,5 +1,6 @@
 package com.example.anen.overlay
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
@@ -137,6 +138,7 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
     // --- INPUT WINDOW OVERLAY ---
     // ==========================================
 
+    @SuppressLint("InflateParams")
     fun showInputWindow(endX: Float, endY: Float, initialLangId: Int, initialSrcId: Int, onWindowDismissed: () -> Unit) {
         if (isInputShowing) return
         hideOverlay()

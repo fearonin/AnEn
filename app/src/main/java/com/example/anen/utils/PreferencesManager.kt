@@ -14,8 +14,8 @@ class PreferencesManager(context: Context) {
         private const val KEY_INVOCATION_METHOD = "invocation_method"
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
         private const val KEY_DEFAULT_LANGUAGE_ID = "default_language_id"
-
         private const val KEY_DEFAULT_SOURCE_ID = "default_source_id"
+        private const val KEY_SKIP_DELETE_CONFIRMATION = "skip_delete_confirmation"
     }
 
     fun setTargetPackages(packageNames: Set<String>) {
@@ -72,5 +72,13 @@ class PreferencesManager(context: Context) {
 
     fun setDefaultSourceId(id: Int) {
         prefs.edit { putInt(KEY_DEFAULT_SOURCE_ID, id) }
+    }
+
+    fun setSkipDeleteConfirmation(skip: Boolean) {
+        prefs.edit { putBoolean(KEY_SKIP_DELETE_CONFIRMATION, skip) }
+    }
+
+    fun shouldSkipDeleteConfirmation(): Boolean {
+        return prefs.getBoolean(KEY_SKIP_DELETE_CONFIRMATION, false)
     }
 }

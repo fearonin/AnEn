@@ -415,4 +415,30 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return source
     }
 
+    fun deleteWordById(id: Int) {
+        val db = this.writableDatabase
+        db.delete(TABLE_WORDS, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+    }
+
+    fun clearDatabase(keepLanguages: Boolean, keepSources: Boolean) {
+        val db = this.writableDatabase
+        if (!keepLanguages) {
+            // Deleting languages will CASCADE delete sources and words
+            db.delete(TABLE_LANGUAGES, null, null)
+        } else if (!keepSources) {
+            // Keep languages, delete sources (and their words)
+            db.delete(TABLE_SOURCES, null, null)
+        } else {
+            // Keep languages and sources, just delete words
+            db.delete(TABLE_WORDS, null, null)
+        }
+        db.close()
+    }
+
+    // Helper to reset settings via preferences
+    fun getAllLanguageNames(): String {
+        return getAllLanguages().joinToString(", ") { it.name }
+    }
+
 }

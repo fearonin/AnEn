@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- DEFAULT: Monochrome -->
-    <style name="Theme.AnEn" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="Theme.AnEn" parent="Theme.Material3.Dark.NoActionBar"> tools:targetApi="31">
         <item name="colorPrimary">@color/mono_primary</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/mono_secondary</item>
@@ -13,6 +13,8 @@
         <item name="colorOnSurfaceVariant">@color/white</item>
         <item name="colorOutline">@color/mono_secondary</item>
         <item name="android:windowBackground">@color/mono_bg</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@mipmap/ic_launcher_foreground</item>
+        <item name="android:windowSplashScreenIconBackgroundColor" tools:ignore="NewApi">@color/black</item>
     </style>
 
     <!-- CYAN -->

@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.text.InputType
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
@@ -17,6 +18,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.EditText
 import android.widget.ListView
 import android.widget.LinearLayout
 import android.widget.ArrayAdapter
@@ -171,7 +173,17 @@ class MainActivity : AppCompatActivity() {
         btnExport.setOnClickListener { checkPermissionsAndRun { showExportDialog(isExportAll = false) } }
         btnExportAll.setOnClickListener { checkPermissionsAndRun { showExportDialog(isExportAll = true) } }
         btnImport.setOnClickListener { checkPermissionsAndRun { openDocumentLauncher.launch(arrayOf("text/plain")) } }
-        btnClearAll.setOnClickListener { checkPermissionsAndRun { showClearDatabaseDialog() } }
+        btnClearAll.setOnClickListener {
+            if (dbHelper.getAllLanguages().isEmpty()) {
+                Toast.makeText(this, "Add at least one language", Toast.LENGTH_SHORT).show()
+            } else {
+                val intent = Intent(this, WordManagerActivity::class.java).apply {
+                    putExtra("LANG_ID", preferencesManager.getDefaultLanguageId())
+                    putExtra("SRC_ID", preferencesManager.getDefaultSourceId())
+                }
+                startActivity(intent)
+            }
+        }
         btnInvocationMethod.setOnClickListener { checkPermissionsAndRun { showInvocationMethodDialog() } }
         btnLanguages.setOnClickListener {
             checkPermissionsAndRun { showLanguageSelectionDialog() }
@@ -873,28 +885,12 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    // ... (showSettingsMenu, showThemeDialog, showAboutDialog, showClearDatabaseDialog,
-    // showInvocationMethodDialog, requestOverlayPermission, openAccessibilitySettings,
-    // isAccessibilityServiceEnabled, showAppSelectionDialog, updateTargetAppButton,
-    // updateSwitchState — leave as they were in the previous step) ...
-
-    private fun showClearDatabaseDialog() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.clear_db_title)
-            .setMessage(R.string.clear_db_message)
-            .setPositiveButton(R.string.btn_yes) { _, _ ->
-                dbHelper.clearAllWords()
-                Toast.makeText(this, "Database cleared", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton(R.string.btn_cancel, null)
-            .show()
-    }
-
     private fun showSettingsMenu() {
         val options = arrayOf(
             getString(R.string.settings_theme),
             "Working Languages",
             "Working Sources",
+            getString(R.string.settings_general), // NEW
             getString(R.string.settings_about)
         )
         AlertDialog.Builder(this)
@@ -904,14 +900,14 @@ class MainActivity : AppCompatActivity() {
                     0 -> showThemeDialog()
                     1 -> startActivity(Intent(this, WorkingLanguagesActivity::class.java))
                     2 -> {
-                        // Check if there is at least one language before opening Sources
                         if (dbHelper.getAllLanguages().isEmpty()) {
                             Toast.makeText(this, "Please add at least one language first.", Toast.LENGTH_SHORT).show()
                         } else {
                             startActivity(Intent(this, WorkingSourcesActivity::class.java))
                         }
                     }
-                    3 -> showAboutDialog()
+                    3 -> startActivity(Intent(this, GeneralSettingsActivity::class.java)) // NEW
+                    4 -> showAboutDialog()
                 }
             }
             .show()

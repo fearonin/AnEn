@@ -1,5 +1,6 @@
 package com.example.anen.service
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
@@ -21,10 +22,11 @@ class AddWordTileService : TileService() {
         tile.updateTile()
     }
 
+    @SuppressLint("StartActivityAndCollapseDeprecated")
     override fun onClick() {
         super.onClick()
 
-        val intent = Intent(this, TileTriggerActivity::class.java).apply {
+        val intent: Intent = Intent(this, TileTriggerActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 

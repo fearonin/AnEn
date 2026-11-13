@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">AnEn</string>
 
     <!-- Main Screen -->
@@ -7,6 +7,7 @@
     <string name="btn_grant_accessibility">Включить службу доступности</string>
     <string name="btn_select_app">Выбрать целевое приложение</string>
     <string name="btn_select_app_selected">Цель: %1$s</string>
+    <string name="btn_select_app_multiple">Цели: %1$d прил.</string>
 
     <!-- Database Actions -->
     <string name="btn_db_normal">База данных (Обычный вид)</string>
@@ -14,12 +15,12 @@
     <string name="btn_export">Экспортировать</string>
     <string name="btn_import">Импортировать</string>
     <string name="btn_export_all">Экспортировать всё</string>
+    <string name="btn_clear">Очистка</string>
 
     <!-- Dialogs and Toasts -->
     <string name="dialog_select_app_title">Выберите целевое приложение</string>
     <string name="toast_no_apps_found">Подходящих приложений не найдено</string>
     <string name="toast_need_permissions">Пожалуйста, сначала предоставьте разрешения</string>
-    <string name="toast_coming_soon">Эта функция будет реализована на следующем этапе</string>
 
     <!-- Accessibility Service -->
     <string name="accessibility_service_label">Служба наложения AnEn</string>
@@ -46,35 +47,32 @@
 
     <!-- Dialog Buttons -->
     <string name="btn_close">Закрыть</string>
-
-    <!-- Bottom Buttons -->
-    <string name="btn_clear_all">Очистить всё</string>
-    <string name="btn_settings">Настройки</string>
-
-    <!-- Settings Dialog -->
-    <string name="settings_title">Настройки</string>
-    <string name="theme_monochrome">Монохромная (Ч/Б)</string>
-    <string name="theme_cyan">Циановая</string>
-    <string name="theme_green">Зеленая</string>
-    <string name="theme_light">Светлая</string>
-    <string name="theme_red">Красная</string>
-    <string name="theme_purple">Фиолетовая</string>
-    <string name="btn_select_app_multiple">Цели: %1$d прил.</string>
-
-    <!-- Clear Confirmation -->
-    <string name="clear_db_title">Очистить базу данных</string>
-    <string name="clear_db_message">Вы уверены, что хотите удалить все слова? Это действие нельзя отменить.</string>
-    <string name="btn_yes">Да, удалить</string>
+    <string name="btn_ok">ОК</string>
+    <string name="btn_yes">Да</string>
     <string name="btn_cancel">Отмена</string>
 
-    <!-- Settings Menu -->
+    <!-- Settings -->
+    <string name="btn_settings">Настройки</string>
     <string name="settings_menu_title">Настройки</string>
     <string name="settings_theme">Тема приложения</string>
     <string name="settings_about">О приложении</string>
+    <string name="settings_general">Основные</string>
+    <string name="general_settings_title">Основные настройки</string>
+    <string name="app_language">Язык приложения</string>
+    <string name="reset_defaults">Сбросить настройки по умолчанию</string>
+    <string name="reset_defaults_message">Вы уверены, что хотите сбросить все настройки? (Это отключит все предупреждения "больше не спрашивать").</string>
+
+    <!-- Themes -->
+    <string name="theme_monochrome">Монохромная (Ч/Б)</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_green">Зеленая</string>
+    <string name="theme_cyan">Циановая</string>
+    <string name="theme_red">Красная</string>
+    <string name="theme_purple">Фиолетовая</string>
 
     <!-- About Dialog -->
     <string name="about_title">О приложении AnEn</string>
-    <string name="about_version">Версия 1.0</string>
+    <string name="about_version">Версия 1.1.0</string>
     <string name="about_description">Удобный инструмент для быстрого сохранения слов</string>
     <string name="about_license">Лицензия</string>
     <string name="about_license_text">Это приложение распространяется под лицензией MIT.</string>
@@ -84,6 +82,12 @@
     <string name="dialog_invocation_title">Выберите метод вызова</string>
     <string name="method_swipe">Свайп вверх (По умолчанию)</string>
     <string name="method_back_button">Удержание кнопки Назад (2 сек)</string>
+    <string name="method_back_button_unavailable">Удержание кнопки Назад (Недоступно)</string>
+    <string name="toast_method_unavailable">Этот метод не поддерживается на вашей версии Android. Используйте свайп или плитку.</string>
+    <string name="method_tile_only">Только плитка настроек</string>
+    <string name="tile_label">Добавить слово</string>
+    <string name="tile_description">Добавить новое слово в AnEn</string>
+    <string name="toast_tile_not_target">Сначала откройте целевое приложение, чтобы добавить слово.</string>
 
     <!-- Delimiters -->
     <string name="delimiter_tab">Табуляция</string>
@@ -98,4 +102,20 @@
     <string name="export_all_title">Экспорт всех слов</string>
     <string name="export_all_include_metadata">Включить метаданные (История)</string>
     <string name="export_all_warning">Метаданные позволяют восстановить даты добавления слов при переустановке приложения.</string>
+
+    <!-- Word Manager -->
+    <string name="word_manager_title">Управление словами</string>
+    <string name="search_words_hint">Поиск слов...</string>
+    <string name="btn_exit">Выйти</string>
+    <string name="confirm_delete_title">Удалить слово</string>
+    <string name="confirm_delete_message">Вы уверены, что хотите удалить "%1$s"?</string>
+    <string name="dont_ask_again">Больше не спрашивать</string>
+
+    <!-- Clear Data -->
+    <string name="btn_clear_data">Очистить данные</string>
+    <string name="clear_tool_title">Очистить данные</string>
+    <string name="clear_tool_message">Вы уверены, что хотите очистить данные? Это действие нельзя отменить.</string>
+    <string name="save_languages">Сохранить языки</string>
+    <string name="save_sources">Сохранить источники</string>
+    <string name="clear_tool_type_langs">Введите через запятую названия ВСЕХ ваших языков для подтверждения:</string>
 </resources>
