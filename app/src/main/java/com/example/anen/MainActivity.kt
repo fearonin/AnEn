@@ -593,9 +593,13 @@ class MainActivity : AppCompatActivity() {
     private fun buildMetadataString(words: List<com.example.anen.data.Word>): String {
         val sb = StringBuilder()
         sb.append("\n\n--- METADATA START ---\n")
-        sb.append("id|word|created_at|is_exported\n")
+        // New format includes Language Name and Source Name
+        sb.append("id|word|language_name|source_name|created_at|is_exported\n")
+
         for (w in words) {
-            sb.append("${w.id}|${w.word}|${w.createdAt}|${if (w.isExported) 1 else 0}\n")
+            val langName = dbHelper.getLanguageById(w.languageId)?.name ?: "English"
+            val srcName = dbHelper.getSourceById(w.sourceId)?.name ?: "Default"
+            sb.append("${w.id}|${w.word}|${langName}|${srcName}|${w.createdAt}|${if (w.isExported) 1 else 0}\n")
         }
         sb.append("--- METADATA END ---\n")
         return sb.toString()
@@ -636,36 +640,205 @@ class MainActivity : AppCompatActivity() {
     private fun importWordsFromFile(uri: Uri) {
         lifecycleScope.launch {
             try {
-                val importedCount = withContext(Dispatchers.IO) {
-                    var count = 0
+                val fileContent = withContext(Dispatchers.IO) {
                     contentResolver.openInputStream(uri)?.use { inputStream ->
-                        val reader = BufferedReader(InputStreamReader(inputStream))
-                        val content = reader.readText()
-
-                        // Extract only the words part (before metadata)
-                        val wordsPart = if (content.contains("--- METADATA START ---")) {
-                            content.substringBefore("--- METADATA START ---")
-                        } else {
-                            content
-                        }
-
-                        // Split by regex matching common delimiters and newlines
-                        val words = wordsPart.split(Regex("[|;:,\\t\\n\\s]+"))
-                            .map { it.trim().lowercase() }
-                            .filter { it.isNotEmpty() }
-                            .distinct()
-
-                        for (word in words) {
-                            if (dbHelper.addWord(word)) count++
-                        }
-                    }
-                    count
+                        inputStream.bufferedReader().use { it.readText() }
+                    } ?: ""
                 }
-                Toast.makeText(this@MainActivity, getString(R.string.toast_import_success) + " ($importedCount)", Toast.LENGTH_LONG).show()
+
+                if (fileContent.isBlank()) {
+                    Toast.makeText(this@MainActivity, "File is empty", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                val hasMetadata = fileContent.contains("--- METADATA START ---")
+
+                if (hasMetadata) {
+                    processImportWithMetadata(fileContent)
+                } else {
+                    processImportWithoutMetadata(fileContent)
+                }
+
             } catch (e: Exception) {
                 Toast.makeText(this@MainActivity, R.string.toast_io_error, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun processImportWithMetadata(fullContent: String) {
+        val wordsPart = fullContent.substringBefore("--- METADATA START ---").trim()
+        val metadataPart = fullContent.substringAfter("--- METADATA START ---").substringBefore("--- METADATA END ---").trim()
+
+        // 1. Parse words
+        val wordsToImport = wordsPart.split(Regex("[|;:,\\t\\n\\s]+"))
+            .map { it.trim().lowercase() }.filter { it.isNotEmpty() }.distinct()
+
+        // 2. Parse metadata to find required languages and sources
+        val requiredLangs = mutableSetOf<String>()
+        val requiredSrcs = mutableSetOf<Pair<String, String>>() // Pair<SourceName, LangName>
+
+        val lines = metadataPart.lines().filter { it.isNotBlank() && !it.contains("id|word") }
+        for (line in lines) {
+            val parts = line.split("|")
+            if (parts.size >= 4) {
+                val langName = parts[2].trim()
+                val srcName = parts[3].trim()
+                if (langName.isNotEmpty() && srcName.isNotEmpty()) {
+                    requiredLangs.add(langName)
+                    requiredSrcs.add(Pair(srcName, langName))
+                }
+            }
+        }
+
+        // 3. Check which ones are missing in the DB
+        val existingLangs = dbHelper.getAllLanguages().map { it.name }
+        val missingLangs = requiredLangs.filter { !existingLangs.contains(it) }
+
+        val missingSrcs = mutableListOf<Pair<String, String>>()
+        for (srcPair in requiredSrcs) {
+            val lang = dbHelper.getAllLanguages().find { it.name == srcPair.second }
+            if (lang != null) {
+                // If language exists, check if source exists for it
+                val existingSrcs = dbHelper.getSourcesForLanguage(lang.id).map { it.name }
+                if (!existingSrcs.contains(srcPair.first)) {
+                    missingSrcs.add(srcPair)
+                }
+            } else {
+                // If language is missing, the source is definitely missing
+                if (!missingSrcs.contains(srcPair)) missingSrcs.add(srcPair)
+            }
+        }
+
+        // 4. If there are missing components, show confirmation dialog
+        if (missingLangs.isNotEmpty() || missingSrcs.isNotEmpty()) {
+            val message = buildString {
+                append("The file contains new languages or sources:\n\n")
+                if (missingLangs.isNotEmpty()) append("Languages: ${missingLangs.joinToString(", ")}\n")
+                if (missingSrcs.isNotEmpty()) append("Sources: ${missingSrcs.map { "${it.first} (${it.second})" }.joinToString(", ")}\n\n")
+                append("Do you want to create them and import the words?")
+            }
+
+            AlertDialog.Builder(this)
+                .setTitle("Missing Components")
+                .setMessage(message)
+                .setPositiveButton("Create & Import") { _, _ ->
+                    // Create missing entities
+                    for (l in missingLangs) {
+                        val newLangId = dbHelper.addLanguage(l, l.take(3))
+                        // Create a default source for the new language just in case
+                        if (newLangId > 0) dbHelper.addSource(newLangId.toInt(), "Default", "Def")
+                    }
+                    for (s in missingSrcs) {
+                        val lang = dbHelper.getAllLanguages().find { it.name == s.second }
+                        if (lang != null) {
+                            dbHelper.addSource(lang.id, s.first, s.first.take(3))
+                        }
+                    }
+                    performActualImport(wordsPart, metadataPart)
+                }
+                .setNegativeButton("Skip", null)
+                .show()
+        } else {
+            // Everything exists, import directly
+            performActualImport(wordsPart, metadataPart)
+        }
+    }
+
+    private fun performActualImport(wordsPart: String, metadataPart: String) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            var count = 0
+            val lines = metadataPart.lines().filter { it.isNotBlank() && !it.contains("id|word") }
+
+            for (line in lines) {
+                val parts = line.split("|")
+                if (parts.size >= 6) {
+                    val wordText = parts[1].trim().lowercase()
+                    val langName = parts[2].trim()
+                    val srcName = parts[3].trim()
+                    val timestamp = parts[4].toLongOrNull() ?: System.currentTimeMillis()
+                    val isExported = parts[5] == "1"
+
+                    val lang = dbHelper.getAllLanguages().find { it.name == langName }
+                    if (lang != null) {
+                        val src = dbHelper.getSourcesForLanguage(lang.id).find { it.name == srcName }
+                            ?: dbHelper.getSourcesForLanguage(lang.id).firstOrNull()
+
+                        if (src != null) {
+                            // Direct insert to preserve timestamp and export status
+                            val db = dbHelper.writableDatabase
+                            val values = android.content.ContentValues().apply {
+                                put("word", wordText)
+                                put("language_id", lang.id)
+                                put("source_id", src.id)
+                                put("created_at", timestamp)
+                                put("is_exported", if (isExported) 1 else 0)
+                            }
+                            val id = db.insertWithOnConflict("words", null, values, android.database.sqlite.SQLiteDatabase.CONFLICT_IGNORE)
+                            if (id != -1L) count++
+                            db.close()
+                        }
+                    }
+                }
+            }
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@MainActivity, "Imported $count words with history", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun processImportWithoutMetadata(rawContent: String) {
+        val wordsToImport = rawContent.split(Regex("[|;:,\\t\\n\\s]+"))
+            .map { it.trim().lowercase() }.filter { it.isNotEmpty() }.distinct()
+
+        if (wordsToImport.isEmpty()) {
+            Toast.makeText(this, "No valid words found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Show dialog asking for Language and Source
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_import_no_meta, null)
+        val spinnerLang = view.findViewById<Spinner>(R.id.spinnerImportLang)
+        val spinnerSrc = view.findViewById<Spinner>(R.id.spinnerImportSrc)
+
+        val languages = dbHelper.getAllLanguages()
+        val langNames = languages.map { it.name }.toTypedArray()
+        spinnerLang.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, langNames)
+
+        fun updateSources() {
+            val selectedLang = languages[spinnerLang.selectedItemPosition]
+            val sources = dbHelper.getSourcesForLanguage(selectedLang.id)
+            val srcNames = sources.map { it.name }.toTypedArray()
+            spinnerSrc.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, srcNames)
+        }
+
+        updateSources()
+
+        spinnerLang.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) { updateSources() }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Select Import Destination")
+            .setMessage("Choose where to put the imported words:")
+            .setView(view)
+            .setPositiveButton("Import") { _, _ ->
+                val selectedLang = languages[spinnerLang.selectedItemPosition]
+                val sources = dbHelper.getSourcesForLanguage(selectedLang.id)
+                val selectedSrc = sources[spinnerSrc.selectedItemPosition]
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    var count = 0
+                    for (word in wordsToImport) {
+                        if (dbHelper.addWord(word, selectedLang.id, selectedSrc.id)) count++
+                    }
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Imported $count words", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     // ... (showSettingsMenu, showThemeDialog, showAboutDialog, showClearDatabaseDialog,
