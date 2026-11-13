@@ -1,6 +1,5 @@
 package com.example.anen.overlay
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
@@ -15,12 +14,18 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.Spinner
 import androidx.appcompat.view.ContextThemeWrapper
 import com.example.anen.R
 import com.example.anen.data.DBHelper
+import com.example.anen.data.Language
+import com.example.anen.data.Source
+import com.example.anen.utils.PreferencesManager
 
 class OverlayManager(private val context: Context, private val dbHelper: DBHelper) {
 
@@ -32,9 +37,10 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
     private var inputView: View? = null
     private var isInputShowing = false
 
-    // Variables to store the origin point for the reverse animation
     private var originTranslationX = 0f
     private var originTranslationY = 0f
+
+    private val preferencesManager = PreferencesManager(context)
 
     companion object {
         private const val TAG = "OverlayManager"
@@ -54,17 +60,20 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
 
         try {
             swipeView = View(context).apply {
-                // Для отладки можно временно сделать зону видимой:
-                // setBackgroundColor(Color.argb(50, 255, 0, 0))
                 setBackgroundColor(Color.TRANSPARENT)
             }
 
             val isLandscape = context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-            val navBarHeight = getNavigationBarHeight(context)
 
             var gravity = Gravity.BOTTOM
             var width = WindowManager.LayoutParams.MATCH_PARENT
-            var height = dpToPx(60) // Увеличили зону свайпа для удобства
+            var height = dpToPx(60)
+
+            if (isLandscape) {
+                gravity = Gravity.END
+                width = dpToPx(60)
+                height = WindowManager.LayoutParams.MATCH_PARENT
+            }
 
             val params = WindowManager.LayoutParams(
                 width,
@@ -73,22 +82,9 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                         WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT
-            )
-
-            if (isLandscape) {
-                gravity = Gravity.END
-                width = dpToPx(60) // Для альбомного режима зона справа
-                height = WindowManager.LayoutParams.MATCH_PARENT
-                params.width = width
-                params.height = height
-                // Смещаем зону влево от правого края на ширину навигационной панели
-                params.x = navBarHeight
-            } else {
-                // Портретный режим. Смещаем зону вверх от нижнего края на высоту навигационной панели
-                params.y = navBarHeight
+            ).apply {
+                this.gravity = gravity
             }
-
-            params.gravity = gravity
 
             var downX = 0f
             var downY = 0f
@@ -106,7 +102,7 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
 
                         if (gravity == Gravity.BOTTOM) {
                             if (downY - event.y > threshold) isSwipeDetected = true
-                        } else if (gravity == Gravity.RIGHT || gravity == Gravity.END) {
+                        } else if (gravity == Gravity.END || gravity == Gravity.RIGHT) {
                             if (downX - event.x > threshold) isSwipeDetected = true
                         }
 
@@ -138,10 +134,10 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
     }
 
     // ==========================================
-    // --- INPUT WINDOW OVERLAY (WITH ANIMATION) ---
+    // --- INPUT WINDOW OVERLAY ---
     // ==========================================
 
-    fun showInputWindow(endX: Float, endY: Float, onWindowDismissed: () -> Unit) {
+    fun showInputWindow(endX: Float, endY: Float, initialLangId: Int, initialSrcId: Int, onWindowDismissed: () -> Unit) {
         if (isInputShowing) return
         hideOverlay()
 
@@ -154,10 +150,85 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             val editText = inputView?.findViewById<EditText>(R.id.editTextWord)
             val btnSave = inputView?.findViewById<View>(R.id.btnSaveWord)
 
+            val spinnerLang = inputView?.findViewById<Spinner>(R.id.spinnerLanguage)
+            val spinnerSrc = inputView?.findViewById<Spinner>(R.id.spinnerSource)
+
+            // Setup Spinners
+            val languages = dbHelper.getAllLanguages()
+            var currentLangId = initialLangId
+            var currentSrcId = initialSrcId
+
+            if (languages.size <= 1) {
+                spinnerLang?.visibility = View.GONE
+            } else {
+                val langNames = languages.map { it.abbreviation }.toTypedArray()
+                val langAdapter = ArrayAdapter(themedContext, android.R.layout.simple_spinner_dropdown_item, langNames)
+                spinnerLang?.adapter = langAdapter
+                spinnerLang?.setSelection(languages.indexOfFirst { it.id == currentLangId }.coerceAtLeast(0))
+            }
+
+            fun updateSourceSpinner(langId: Int, isInitial: Boolean = false) {
+                val sources = dbHelper.getSourcesForLanguage(langId)
+                if (sources.size <= 1) {
+                    spinnerSrc?.visibility = View.GONE
+                    if (sources.isNotEmpty()) {
+                        currentSrcId = sources.first().id
+                        preferencesManager.setDefaultSourceId(currentSrcId)
+                    }
+                } else {
+                    spinnerSrc?.visibility = View.VISIBLE
+                    // If this is triggered by language change (not initial load), make it visible immediately
+                    if (!isInitial) {
+                        spinnerSrc?.alpha = 1f
+                    }
+
+                    val srcNames = sources.map { it.abbreviation }.toTypedArray()
+                    val srcAdapter = ArrayAdapter(themedContext, android.R.layout.simple_spinner_dropdown_item, srcNames)
+                    spinnerSrc?.adapter = srcAdapter
+
+                    val srcIndex = sources.indexOfFirst { it.id == currentSrcId }
+                    if (srcIndex == -1) {
+                        currentSrcId = sources.first().id
+                        spinnerSrc?.setSelection(0)
+                        preferencesManager.setDefaultSourceId(currentSrcId)
+                    } else {
+                        spinnerSrc?.setSelection(srcIndex)
+                    }
+                }
+            }
+
+            updateSourceSpinner(currentLangId, isInitial = true)
+
+            // Spinner Listeners
+            spinnerLang?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selectedLang = languages[position]
+                    currentLangId = selectedLang.id
+                    preferencesManager.setDefaultLanguageId(currentLangId)
+
+                    // Pass isInitial = false so the spinner becomes visible immediately
+                    updateSourceSpinner(currentLangId, isInitial = false)
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+
+            spinnerSrc?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val sources = dbHelper.getSourcesForLanguage(currentLangId)
+                    if (sources.isNotEmpty() && position < sources.size) {
+                        currentSrcId = sources[position].id
+                        preferencesManager.setDefaultSourceId(currentSrcId)
+                    }
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+
+            // Initial state for animation
             editText?.alpha = 0f
             btnSave?.alpha = 0f
+            spinnerLang?.alpha = 0f
+            spinnerSrc?.alpha = 0f
 
-            // Calculate and store the origin offset relative to the screen center
             val displayMetrics = context.resources.displayMetrics
             val screenCenterX = displayMetrics.widthPixels / 2f
             val screenCenterY = displayMetrics.heightPixels / 2f
@@ -168,7 +239,6 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             originTranslationX = startX - screenCenterX
             originTranslationY = startY - screenCenterY
 
-            // Setup initial state for the appearance animation
             inputContainer?.apply {
                 scaleX = 0.1f
                 scaleY = 0.1f
@@ -194,19 +264,19 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
 
             editText?.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    processAndSaveWord(editText.text.toString(), onWindowDismissed)
+                    processAndSaveWord(editText.text.toString(), currentLangId, currentSrcId, onWindowDismissed)
                     true
                 } else false
             }
 
             btnSave?.setOnClickListener {
-                processAndSaveWord(editText?.text.toString(), onWindowDismissed)
+                processAndSaveWord(editText?.text.toString(), currentLangId, currentSrcId, onWindowDismissed)
             }
 
             windowManager?.addView(inputView, params)
             isInputShowing = true
 
-            // PLAY APPEARANCE ANIMATION
+            // Play appearance animation
             inputContainer?.animate()
                 ?.scaleX(1f)
                 ?.scaleY(1f)
@@ -217,6 +287,8 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
                 ?.withEndAction {
                     editText?.animate()?.alpha(1f)?.setDuration(200)?.start()
                     btnSave?.animate()?.alpha(1f)?.setDuration(200)?.start()
+                    if (spinnerLang?.visibility == View.VISIBLE) spinnerLang?.animate()?.alpha(1f)?.setDuration(200)?.start()
+                    if (spinnerSrc?.visibility == View.VISIBLE) spinnerSrc?.animate()?.alpha(1f)?.setDuration(200)?.start()
 
                     editText?.postDelayed({
                         editText.requestFocus()
@@ -232,14 +304,14 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
         }
     }
 
-    private fun processAndSaveWord(rawInput: String, onWindowDismissed: () -> Unit) {
+    private fun processAndSaveWord(rawInput: String, langId: Int, srcId: Int, onWindowDismissed: () -> Unit) {
         val word = rawInput.trim().lowercase()
         if (word.isEmpty()) {
             hideInputWindow(saveAction = false, onWindowDismissed)
             return
         }
 
-        val isNewWord = dbHelper.addWord(word)
+        val isNewWord = dbHelper.addWord(word, langId, srcId)
         val container = inputView?.findViewById<LinearLayout>(R.id.inputContainer)
 
         if (isNewWord) {
@@ -250,7 +322,6 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
             container?.setBackgroundResource(R.drawable.bg_input_black)
         }
 
-        // Call hide with saveAction = true to trigger the reverse animation
         hideInputWindow(saveAction = true, onWindowDismissed)
     }
 
@@ -263,19 +334,21 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
         val inputContainer = inputView?.findViewById<LinearLayout>(R.id.inputContainer)
         val editText = inputView?.findViewById<EditText>(R.id.editTextWord)
         val btnSave = inputView?.findViewById<View>(R.id.btnSaveWord)
+        val spinnerLang = inputView?.findViewById<Spinner>(R.id.spinnerLanguage)
+        val spinnerSrc = inputView?.findViewById<Spinner>(R.id.spinnerSource)
 
-        // 1. Quickly fade out the text and button
         editText?.animate()?.alpha(0f)?.setDuration(100)?.start()
         btnSave?.animate()?.alpha(0f)?.setDuration(100)?.start()
+        spinnerLang?.animate()?.alpha(0f)?.setDuration(100)?.start()
+        spinnerSrc?.animate()?.alpha(0f)?.setDuration(100)?.start()
 
-        // 2. Reverse the animation: shrink and translate back to the origin point
         inputContainer?.animate()
             ?.scaleX(0.1f)
             ?.scaleY(0.1f)
             ?.translationX(originTranslationX)
             ?.translationY(originTranslationY)
-            ?.setDuration(250) // Slightly faster than appearance to feel snappy
-            ?.setInterpolator(AccelerateInterpolator()) // Accelerates as it shrinks away
+            ?.setDuration(250)
+            ?.setInterpolator(AccelerateInterpolator())
             ?.withEndAction {
                 removeInputView()
                 onWindowDismissed()
@@ -295,16 +368,5 @@ class OverlayManager(private val context: Context, private val dbHelper: DBHelpe
 
     private fun dpToPx(dp: Int): Int {
         return (dp * context.resources.displayMetrics.density).toInt()
-    }
-
-    @SuppressLint("DiscouragedApi", "InternalInsetResource")
-    private fun getNavigationBarHeight(context: Context): Int {
-        val resources = context.resources
-        val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
-        return if (resourceId > 0) {
-            resources.getDimensionPixelSize(resourceId)
-        } else {
-            (48 * resources.displayMetrics.density).toInt() // Fallback to 48dp
-        }
     }
 }

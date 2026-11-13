@@ -32,8 +32,10 @@ class OverlayAccessibilityService : AccessibilityService() {
             if (intent?.action == "com.example.anen.SHOW_INPUT_OVERLAY") {
                 Log.d(TAG, "Broadcast received. Showing overlay.")
                 Handler(Looper.getMainLooper()).post {
-                    // No target app check! Works everywhere.
-                    overlayManager.showInputWindow(0f, 0f) { }
+                    // Get default IDs and pass them to the overlay
+                    val langId = preferencesManager.getDefaultLanguageId()
+                    val srcId = preferencesManager.getDefaultSourceId()
+                    overlayManager.showInputWindow(0f, 0f, langId, srcId) { }
                 }
             }
         }
@@ -52,9 +54,8 @@ class OverlayAccessibilityService : AccessibilityService() {
 
         val filter = IntentFilter("com.example.anen.SHOW_INPUT_OVERLAY")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Use RECEIVER_EXPORTED because the broadcast comes from an Activity,
-            // but it's secure because we use setPackage() in TileTriggerActivity.
-            registerReceiver(overlayReceiver, filter, Context.RECEIVER_EXPORTED)
+            // RECEIVER_NOT_EXPORTED fixes the lint warning
+            registerReceiver(overlayReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
             registerReceiver(overlayReceiver, filter)
         }
@@ -86,13 +87,15 @@ class OverlayAccessibilityService : AccessibilityService() {
 
         val isTargetApp = isServiceEnabled && targetPackages.contains(activePackage)
 
-        // Swipe only works in target apps and if selected
         if (isTargetApp && invocationMethod == "swipe") {
             overlayManager.showOverlay { endX, endY ->
-                overlayManager.showInputWindow(endX, endY) {
+                // Get default IDs and pass them
+                val langId = preferencesManager.getDefaultLanguageId()
+                val srcId = preferencesManager.getDefaultSourceId()
+                overlayManager.showInputWindow(endX, endY, langId, srcId) {
                     if (currentPackageName == activePackage && preferencesManager.isServiceEnabled() && preferencesManager.getInvocationMethod() == "swipe") {
                         overlayManager.showOverlay { x, y ->
-                            overlayManager.showInputWindow(x, y) { }
+                            overlayManager.showInputWindow(x, y, langId, srcId) { }
                         }
                     }
                 }
@@ -119,7 +122,9 @@ class OverlayAccessibilityService : AccessibilityService() {
                     backButtonRunnable = Runnable {
                         isBackButtonTriggered = true
                         Handler(Looper.getMainLooper()).post {
-                            overlayManager.showInputWindow(0f, 0f) { }
+                            val langId = preferencesManager.getDefaultLanguageId()
+                            val srcId = preferencesManager.getDefaultSourceId()
+                            overlayManager.showInputWindow(0f, 0f, langId, srcId) { }
                         }
                     }
                     backButtonHandler.postDelayed(backButtonRunnable!!, LONG_PRESS_DELAY)
@@ -149,7 +154,9 @@ class OverlayAccessibilityService : AccessibilityService() {
             overlayManager.hideOverlay()
             Handler(Looper.getMainLooper()).postDelayed({
                 overlayManager.showOverlay { x, y ->
-                    overlayManager.showInputWindow(x, y) { }
+                    val langId = preferencesManager.getDefaultLanguageId()
+                    val srcId = preferencesManager.getDefaultSourceId()
+                    overlayManager.showInputWindow(x, y, langId, srcId) { }
                 }
             }, 500)
         }

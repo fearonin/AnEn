@@ -367,4 +367,37 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return count
     }
 
+    fun getLanguageById(id: Int): Language? {
+        val db = this.readableDatabase
+        val cursor = db.query(TABLE_LANGUAGES, null, "$COLUMN_ID = ?", arrayOf(id.toString()), null, null, null)
+        var language: Language? = null
+        if (cursor.moveToFirst()) {
+            language = Language(
+                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ABBREVIATION))
+            )
+        }
+        cursor.close()
+        db.close()
+        return language
+    }
+
+    fun getSourceById(id: Int): Source? {
+        val db = this.readableDatabase
+        val cursor = db.query(TABLE_SOURCES, null, "$COLUMN_ID = ?", arrayOf(id.toString()), null, null, null)
+        var source: Source? = null
+        if (cursor.moveToFirst()) {
+            source = Source(
+                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LANGUAGE_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ABBREVIATION))
+            )
+        }
+        cursor.close()
+        db.close()
+        return source
+    }
+
 }

@@ -14,6 +14,8 @@ class PreferencesManager(context: Context) {
         private const val KEY_INVOCATION_METHOD = "invocation_method"
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
         private const val KEY_DEFAULT_LANGUAGE_ID = "default_language_id"
+
+        private const val KEY_DEFAULT_SOURCE_ID = "default_source_id"
     }
 
     fun setTargetPackages(packageNames: Set<String>) {
@@ -62,5 +64,13 @@ class PreferencesManager(context: Context) {
 
     fun setDefaultLanguageId(id: Int) {
         prefs.edit { putInt(KEY_DEFAULT_LANGUAGE_ID, id) }
+    }
+
+    fun getDefaultSourceId(): Int {
+        return prefs.getInt(KEY_DEFAULT_SOURCE_ID, 1) // Defaults to 1
+    }
+
+    fun setDefaultSourceId(id: Int) {
+        prefs.edit { putInt(KEY_DEFAULT_SOURCE_ID, id) }
     }
 }

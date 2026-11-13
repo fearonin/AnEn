@@ -15,6 +15,7 @@ import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ListView
+import android.widget.LinearLayout
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.ScrollView
@@ -57,6 +58,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnImport: MaterialButton
     private lateinit var btnExportAll: MaterialButton
     private lateinit var btnClearAll: MaterialButton
+    private lateinit var btnLanguages: MaterialButton
+    private lateinit var btnSources: MaterialButton
     private lateinit var btnSettings: MaterialButton
     private lateinit var btnInvocationMethod: MaterialButton
 
@@ -112,6 +115,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         updatePermissionButtonsState()
         updateUiState()
+        updateLanguageAndSourceButtons()
     }
 
     private fun initViews() {
@@ -127,6 +131,8 @@ class MainActivity : AppCompatActivity() {
         btnClearAll = findViewById(R.id.btnClearAll)
         btnSettings = findViewById(R.id.btnSettings)
         btnInvocationMethod = findViewById(R.id.btnInvocationMethod)
+        btnLanguages = findViewById(R.id.btnLanguages)
+        btnSources = findViewById(R.id.btnSources)
     }
 
     private fun setupListeners() {
@@ -159,6 +165,13 @@ class MainActivity : AppCompatActivity() {
         btnExportAll.setOnClickListener { checkPermissionsAndRun { showExportAllSettingsDialog() } }
         btnClearAll.setOnClickListener { checkPermissionsAndRun { showClearDatabaseDialog() } }
         btnInvocationMethod.setOnClickListener { checkPermissionsAndRun { showInvocationMethodDialog() } }
+        btnLanguages.setOnClickListener {
+            checkPermissionsAndRun { showLanguageSelectionDialog() }
+        }
+        btnSources.setOnClickListener {
+            checkPermissionsAndRun { showSourceSelectionDialog() }
+        }
+
 
         btnSettings.setOnClickListener { showSettingsMenu() }
     }
@@ -170,7 +183,8 @@ class MainActivity : AppCompatActivity() {
         val alphaValue = if (allPermissionsGranted) 1.0f else 0.4f
 
         val restrictedViews = listOf(
-            btnSelectApp, btnDbNormal, btnDbRaw, btnExport, btnImport, btnExportAll, btnClearAll, btnInvocationMethod
+            btnSelectApp, btnDbNormal, btnDbRaw, btnExport, btnImport, btnExportAll, btnClearAll, btnInvocationMethod,
+            btnLanguages, btnSources
         )
 
         restrictedViews.forEach { view ->
@@ -695,5 +709,79 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateSwitchState() {
         switchService.isChecked = preferencesManager.isServiceEnabled()
+    }
+
+    private fun updateLanguageAndSourceButtons() {
+        val languages = dbHelper.getAllLanguages()
+
+        // If only 1 language, hide the Languages button and make Sources full width
+        if (languages.size <= 1) {
+            btnLanguages.visibility = View.GONE
+            val params = btnSources.layoutParams as LinearLayout.LayoutParams
+            params.weight = 2f // Take full width
+            params.marginStart = 0
+            btnSources.layoutParams = params
+        } else {
+            btnLanguages.visibility = View.VISIBLE
+            val params = btnSources.layoutParams as LinearLayout.LayoutParams
+            params.weight = 1f // Half width
+            params.marginStart = 16
+            btnSources.layoutParams = params
+        }
+
+        // Update text
+        val defaultLangId = preferencesManager.getDefaultLanguageId()
+        val defaultLang = dbHelper.getLanguageById(defaultLangId)
+        btnLanguages.text = defaultLang?.abbreviation ?: "Lang"
+
+        val defaultSourceId = preferencesManager.getDefaultSourceId()
+        val defaultSource = dbHelper.getSourceById(defaultSourceId)
+        btnSources.text = defaultSource?.abbreviation ?: "Src"
+    }
+
+    private fun showLanguageSelectionDialog() {
+        val languages = dbHelper.getAllLanguages()
+        if (languages.isEmpty()) return
+
+        val names = languages.map { "${it.name} (${it.abbreviation})" }.toTypedArray()
+        val currentId = preferencesManager.getDefaultLanguageId()
+        val currentIndex = languages.indexOfFirst { it.id == currentId }.coerceAtLeast(0)
+
+        AlertDialog.Builder(this)
+            .setTitle("Select Default Language")
+            .setSingleChoiceItems(names, currentIndex) { dialog, which ->
+                val selected = languages[which]
+                preferencesManager.setDefaultLanguageId(selected.id)
+
+                // When language changes, default source must change to the first available source of that language
+                val sources = dbHelper.getSourcesForLanguage(selected.id)
+                if (sources.isNotEmpty()) {
+                    preferencesManager.setDefaultSourceId(sources.first().id)
+                }
+
+                updateLanguageAndSourceButtons()
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun showSourceSelectionDialog() {
+        val defaultLangId = preferencesManager.getDefaultLanguageId()
+        val sources = dbHelper.getSourcesForLanguage(defaultLangId)
+
+        if (sources.isEmpty()) return
+
+        val names = sources.map { "${it.name} (${it.abbreviation})" }.toTypedArray()
+        val currentId = preferencesManager.getDefaultSourceId()
+        val currentIndex = sources.indexOfFirst { it.id == currentId }.coerceAtLeast(0)
+
+        AlertDialog.Builder(this)
+            .setTitle("Select Default Source")
+            .setSingleChoiceItems(names, currentIndex) { dialog, which ->
+                preferencesManager.setDefaultSourceId(sources[which].id)
+                updateLanguageAndSourceButtons()
+                dialog.dismiss()
+            }
+            .show()
     }
 }
