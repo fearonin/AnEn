@@ -1,7 +1,6 @@
 package com.example.anen
 
 import android.os.Bundle
-import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +25,7 @@ class WorkingSourcesActivity : AppCompatActivity() {
     private lateinit var dbHelper: DBHelper
     private lateinit var adapter: SourcesAdapter
     private lateinit var rvSources: RecyclerView
+    private var isEditMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,8 +33,15 @@ class WorkingSourcesActivity : AppCompatActivity() {
 
         dbHelper = DBHelper(this)
 
-        findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbarSources).setNavigationOnClickListener {
-            finish()
+        val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbarSources)
+        toolbar.setNavigationOnClickListener { finish() }
+        toolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_edit) {
+                isEditMode = !isEditMode
+                adapter.notifyDataSetChanged()
+                Toast.makeText(this, if (isEditMode) getString(R.string.editing_src_names) else getString(R.string.editing_abbrev), Toast.LENGTH_SHORT).show()
+                true
+            } else false
         }
 
         rvSources = findViewById(R.id.rvSources)
@@ -48,12 +55,11 @@ class WorkingSourcesActivity : AppCompatActivity() {
         val flatList = mutableListOf<Any>()
 
         for (lang in languages) {
-            flatList.add(lang) // Add Language Header
+            flatList.add(lang)
             val sources = dbHelper.getSourcesForLanguage(lang.id)
-            flatList.addAll(sources) // Add Sources under it
+            flatList.addAll(sources)
         }
 
-        // FIX: Use ::adapter.isInitialized instead of adapter == null
         if (!::adapter.isInitialized) {
             adapter = SourcesAdapter(flatList, dbHelper)
             rvSources.adapter = adapter
@@ -62,7 +68,6 @@ class WorkingSourcesActivity : AppCompatActivity() {
         }
     }
 
-    // Adapter with two view types (Header and Item)
     inner class SourcesAdapter(
         private var items: List<Any>,
         private val dbHelper: DBHelper
@@ -91,17 +96,27 @@ class WorkingSourcesActivity : AppCompatActivity() {
             if (holder is HeaderViewHolder) {
                 val lang = items[position] as Language
                 holder.tvHeader.text = "${lang.name} (${lang.abbreviation})"
-
-                holder.btnAdd.setOnClickListener {
-                    showAddSourceDialog(lang)
-                }
+                holder.btnAdd.setOnClickListener { showAddSourceDialog(lang) }
             } else if (holder is ItemViewHolder) {
                 val source = items[position] as Source
-                holder.tvName.text = source.name
+                holder.etName.setText(source.name)
                 holder.etAbbrev.setText(source.abbreviation)
 
-                holder.etAbbrev.setOnFocusChangeListener { _, hasFocus ->
-                    if (!hasFocus) {
+                holder.etName.isEnabled = isEditMode
+                holder.etAbbrev.isEnabled = !isEditMode
+
+                holder.etName.setOnFocusChangeListener { view, hasFocus ->
+                    if (!hasFocus && isEditMode) {
+                        val newName = holder.etName.text.toString().trim()
+                        if (newName.isNotEmpty() && newName != source.name) {
+                            dbHelper.updateSource(source.id, newName, source.abbreviation)
+                            buildDataAndUpdateAdapter()
+                        }
+                    }
+                }
+
+                holder.etAbbrev.setOnFocusChangeListener { view, hasFocus ->
+                    if (!hasFocus && !isEditMode) {
                         val newAbbrev = holder.etAbbrev.text.toString().take(3)
                         if (newAbbrev != source.abbreviation && newAbbrev.isNotEmpty()) {
                             dbHelper.updateSource(source.id, source.name, newAbbrev)
@@ -110,21 +125,19 @@ class WorkingSourcesActivity : AppCompatActivity() {
                     }
                 }
 
-                holder.btnDelete.setOnClickListener {
+                holder.btnDelete.setOnClickListener { view ->
                     val wordCount = dbHelper.getWordCountForSource(source.id)
                     if (wordCount == 0) {
-                        // Simple Delete
                         AlertDialog.Builder(this@WorkingSourcesActivity)
                             .setTitle("Delete Source")
                             .setMessage("Delete source '${source.name}'?")
-                            .setPositiveButton("Delete") { _, _ ->
+                            .setPositiveButton(R.string.btn_yes) { dialog, which ->
                                 dbHelper.deleteSource(source.id)
                                 buildDataAndUpdateAdapter()
                             }
-                            .setNegativeButton("Cancel", null)
+                            .setNegativeButton(R.string.btn_cancel) { dialog, which -> dialog.dismiss() }
                             .show()
                     } else {
-                        // Secure Delete
                         showSecureDeleteDialog(source, wordCount)
                     }
                 }
@@ -139,7 +152,7 @@ class WorkingSourcesActivity : AppCompatActivity() {
         }
 
         inner class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val tvName: TextView = view.findViewById(R.id.tvSourceName)
+            val etName: TextInputEditText = view.findViewById(R.id.etSourceName)
             val etAbbrev: TextInputEditText = view.findViewById(R.id.etSourceAbbrev)
             val btnDelete: MaterialButton = view.findViewById(R.id.btnDeleteSource)
         }
@@ -151,9 +164,9 @@ class WorkingSourcesActivity : AppCompatActivity() {
         val etAbbrev = dialogView.findViewById<EditText>(R.id.etSourceAbbrev)
 
         AlertDialog.Builder(this)
-            .setTitle("Add Source to ${language.name}")
+            .setTitle(getString(R.string.add_source_to_lang, language.name))
             .setView(dialogView)
-            .setPositiveButton("Add") { _, _ ->
+            .setPositiveButton(R.string.btn_ok) { dialog, which ->
                 val name = etName.text.toString().trim()
                 var abbrev = etAbbrev.text.toString().trim()
                 if (name.isNotEmpty()) {
@@ -166,21 +179,20 @@ class WorkingSourcesActivity : AppCompatActivity() {
                     }
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.btn_cancel) { dialog, which -> dialog.dismiss() }
             .show()
     }
 
     private fun showSecureDeleteDialog(source: Source, wordCount: Int) {
         val input = EditText(this).apply {
             hint = "Enter source name"
-            inputType = InputType.TYPE_CLASS_TEXT
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Warning!")
-            .setMessage("This source contains $wordCount words. Deleting it will permanently delete all its words. \n\nType '${source.name}' to confirm.")
+            .setTitle(R.string.dialog_warning_title)
+            .setMessage(getString(R.string.delete_source_warning_message, wordCount, source.name))
             .setView(input)
-            .setPositiveButton("Delete") { _, _ ->
+            .setPositiveButton(R.string.btn_yes) { dialog, which ->
                 if (input.text.toString().trim().equals(source.name, ignoreCase = true)) {
                     dbHelper.deleteSource(source.id)
                     buildDataAndUpdateAdapter()
@@ -189,7 +201,7 @@ class WorkingSourcesActivity : AppCompatActivity() {
                     Toast.makeText(this, "Name does not match. Deletion cancelled.", Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.btn_cancel) { dialog, which -> dialog.dismiss() }
             .show()
     }
 }

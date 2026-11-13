@@ -8,25 +8,28 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="8dp"
+        android:hint="@string/source_name_hint">
+
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etSourceName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Source Name (e.g. Book, Movie)"
-            android:maxLines="1"/>
+            android:inputType="textCapWords"
+            android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:hint="@string/abbreviation_hint">
+
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etSourceAbbrev"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Abbreviation (optional, max 3)"
             android:inputType="textCapWords"
             android:maxLength="3"
-            android:maxLines="1"/>
+            android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>

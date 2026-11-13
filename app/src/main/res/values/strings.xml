@@ -20,7 +20,8 @@
     <!-- Dialogs and Toasts -->
     <string name="dialog_select_app_title">Select target application</string>
     <string name="toast_no_apps_found">No suitable apps found</string>
-    <string name="toast_need_permissions">Please grant permissions first</string>
+    <string name="toast_need_permissions">Please grant all permissions first</string>
+    <string name="toast_add_language">Add at least one language</string>
 
     <!-- Accessibility Service -->
     <string name="accessibility_service_label">AnEn Overlay Service</string>
@@ -118,4 +119,52 @@
     <string name="save_languages">Save Languages</string>
     <string name="save_sources">Save Sources</string>
     <string name="clear_tool_type_langs">Type the names of ALL your languages separated by commas to confirm:</string>
+    <string name="toast_no_words_to_clear">You must have at least 1 word to clear data</string>
+
+    <!-- Missing Translations -->
+    <string name="dialog_select_lang_title">Select Default Language</string>
+    <string name="dialog_select_src_title">Select Default Source</string>
+    <string name="filter_languages">Filter Languages</string>
+    <string name="filter_sources">Filter Sources</string>
+    <string name="option_all">All</string>
+    <string name="btn_languages_all">Languages (All)</string>
+    <string name="btn_sources_all">Sources (All)</string>
+    <string name="btn_languages_count">Languages (%1$d)</string>
+    <string name="btn_sources_count">Sources (%1$d)</string>
+    <string name="btn_sources_none">Sources (None)</string>
+    <string name="search_apps_hint">Search apps...</string>
+    <string name="working_languages_title">Working Languages</string>
+    <string name="working_sources_title">Working Sources</string>
+    <string name="language_name_hint">Language name</string>
+    <string name="source_name_hint">Source name</string>
+    <string name="editing_lang_names">Editing Language Names</string>
+    <string name="editing_src_names">Editing Source Names</string>
+    <string name="editing_abbrev">Editing Abbreviations</string>
+
+    <!-- Import / Metadata Toasts -->
+    <string name="toast_file_empty">File is empty</string>
+    <string name="toast_no_valid_header">No valid words in the file header</string>
+    <string name="toast_no_valid_words">No valid words found</string>
+    <string name="toast_imported_words">Imported %1$d words</string>
+    <string name="toast_imported_history">Imported %1$d words with history</string>
+    <string name="toast_selected_only_source">Selected only available source</string>
+
+    <!-- Missing Components Dialog -->
+    <string name="dialog_missing_components_title">Missing Components</string>
+    <string name="dialog_missing_components_lang_header">Languages: %1$s</string>
+    <string name="dialog_missing_components_src_header">Sources: %1$s</string>
+    <string name="dialog_missing_components_question">Do you want to create them and import the words?</string>
+    <string name="btn_create_import">Create &amp; Import</string>
+    <string name="btn_skip">Skip</string>
+
+    <!-- Import Destination Dialog -->
+    <string name="dialog_import_destination_title">Select Import Destination</string>
+    <string name="dialog_import_destination_message">Choose where to put the imported words:</string>
+    <string name="btn_import_action">Import</string>
+
+    <string name="add_source_to_lang">Add Source to %1$s</string>
+    <string name="dialog_warning_title">Warning!</string>
+    <string name="delete_source_warning_message">This source contains %1$d words. Deleting it will permanently delete all its words.\n\nType \'%2$s\' to confirm.</string>
+    <string name="delete_language_warning_message">This language contains %1$d words. Deleting it will permanently delete all its sources and words.\n\nType \'%2$s\' to confirm.</string>
+    <string name="abbreviation_hint">Abbreviation (optional, max 3)</string>
 </resources>

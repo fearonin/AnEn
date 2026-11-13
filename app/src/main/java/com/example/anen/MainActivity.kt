@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.text.InputType
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
@@ -17,13 +16,11 @@ import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.LinearLayout
 import android.widget.ArrayAdapter
+import android.widget.BaseAdapter
 import android.widget.CheckBox
-import android.widget.ScrollView
+import android.widget.LinearLayout
+import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -32,20 +29,18 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
-import com.example.anen.data.DBHelper
-import com.example.anen.service.OverlayAccessibilityService
 import com.example.anen.data.AppInfo
+import com.example.anen.data.DBHelper
 import com.example.anen.data.Source
-import com.example.anen.utils.PreferencesManager
+import com.example.anen.service.OverlayAccessibilityService
 import com.example.anen.utils.AppSelectionAdapter
-import com.google.android.material.textfield.TextInputEditText
+import com.example.anen.utils.PreferencesManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -72,17 +67,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dbHelper: DBHelper
     private lateinit var preferencesManager: PreferencesManager
 
-    // State for export
     private var pendingExportWords: List<String> = emptyList()
     private var pendingMetadata: String = ""
     private var isExportAllMode = false
     private var exportDelimiter = "\t"
 
-    // Filter states (Empty means ALL)
     private var selectedLangIds: MutableSet<Int> = mutableSetOf()
     private var selectedSrcIds: MutableSet<Int> = mutableSetOf()
 
-    // Delimiter arrays
     private val delimiterSymbols = arrayOf("\t", "|", ";", ":", ",", " ")
 
     private val createDocumentLauncher = registerForActivityResult(
@@ -108,13 +100,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        dbHelper = DBHelper(this)
+
         if (!preferencesManager.isOnboardingCompleted()) {
             startActivity(Intent(this, OnboardingActivity::class.java))
             finish()
             return
         }
 
-        dbHelper = DBHelper(this)
         initViews()
         setupListeners()
         updateTargetAppButton()
@@ -123,9 +116,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        updatePermissionButtonsState()
-        updateUiState()
-        updateLanguageAndSourceButtons()
+        if (preferencesManager.isOnboardingCompleted()) {
+            updatePermissionButtonsState()
+            updateUiState()
+            updateLanguageAndSourceButtons()
+        }
     }
 
     private fun initViews() {
@@ -159,24 +154,19 @@ class MainActivity : AppCompatActivity() {
         btnOverlayPermission.setOnClickListener { requestOverlayPermission() }
         btnAccessibilityPermission.setOnClickListener { openAccessibilitySettings() }
 
-        val checkPermissionsAndRun: (() -> Unit) -> Unit = { action ->
-            if (Settings.canDrawOverlays(this) && isAccessibilityServiceEnabled()) {
-                action()
-            } else {
-                Toast.makeText(this, "Please grant all permissions first", Toast.LENGTH_SHORT).show()
-            }
-        }
+        btnSelectApp.setOnClickListener { withPermissions { showAppSelectionDialog() } }
+        btnInvocationMethod.setOnClickListener { withPermissions { showInvocationMethodDialog() } }
+        btnLanguages.setOnClickListener { withPermissions { showLanguageSelectionDialog() } }
+        btnSources.setOnClickListener { withPermissions { showSourceSelectionDialog() } }
 
-        btnSelectApp.setOnClickListener { checkPermissionsAndRun { showAppSelectionDialog() } }
-        btnDbNormal.setOnClickListener { checkPermissionsAndRun { showNormalDatabaseView() } }
-        btnDbRaw.setOnClickListener { checkPermissionsAndRun { showRawDatabaseView() } }
-        btnExport.setOnClickListener { checkPermissionsAndRun { showExportDialog(isExportAll = false) } }
-        btnExportAll.setOnClickListener { checkPermissionsAndRun { showExportDialog(isExportAll = true) } }
-        btnImport.setOnClickListener { checkPermissionsAndRun { openDocumentLauncher.launch(arrayOf("text/plain")) } }
+        btnDbNormal.setOnClickListener { withPermissionsAndLanguages { showNormalDatabaseView() } }
+        btnDbRaw.setOnClickListener { withPermissionsAndLanguages { showRawDatabaseView() } }
+        btnExport.setOnClickListener { withPermissionsAndLanguages { showExportDialog(isExportAll = false) } }
+        btnExportAll.setOnClickListener { withPermissionsAndLanguages { showExportDialog(isExportAll = true) } }
+        btnImport.setOnClickListener { withPermissions { openDocumentLauncher.launch(arrayOf("text/plain")) } }
+
         btnClearAll.setOnClickListener {
-            if (dbHelper.getAllLanguages().isEmpty()) {
-                Toast.makeText(this, "Add at least one language", Toast.LENGTH_SHORT).show()
-            } else {
+            withPermissionsAndLanguages {
                 val intent = Intent(this, WordManagerActivity::class.java).apply {
                     putExtra("LANG_ID", preferencesManager.getDefaultLanguageId())
                     putExtra("SRC_ID", preferencesManager.getDefaultSourceId())
@@ -184,41 +174,32 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         }
-        btnInvocationMethod.setOnClickListener { checkPermissionsAndRun { showInvocationMethodDialog() } }
-        btnLanguages.setOnClickListener {
-            checkPermissionsAndRun { showLanguageSelectionDialog() }
-        }
-        btnSources.setOnClickListener {
-            checkPermissionsAndRun { showSourceSelectionDialog() }
-        }
-
-        val hasLanguages = { dbHelper.getAllLanguages().isNotEmpty() }
-
-        btnDbNormal.setOnClickListener {
-            if (!hasLanguages()) Toast.makeText(this, "Add at least one language", Toast.LENGTH_SHORT).show()
-            else checkPermissionsAndRun { showNormalDatabaseView() }
-        }
-        btnDbRaw.setOnClickListener {
-            if (!hasLanguages()) Toast.makeText(this, "Add at least one language", Toast.LENGTH_SHORT).show()
-            else checkPermissionsAndRun { showRawDatabaseView() }
-        }
-        btnExport.setOnClickListener {
-            if (!hasLanguages()) Toast.makeText(this, "Add at least one language", Toast.LENGTH_SHORT).show()
-            else checkPermissionsAndRun { showExportDialog(isExportAll = false) }
-        }
-        btnExportAll.setOnClickListener {
-            if (!hasLanguages()) Toast.makeText(this, "Add at least one language", Toast.LENGTH_SHORT).show()
-            else checkPermissionsAndRun { showExportDialog(isExportAll = true) }
-        }
-
 
         btnSettings.setOnClickListener { showSettingsMenu() }
     }
 
+    private fun hasPermissions(): Boolean {
+        return Settings.canDrawOverlays(this) && isAccessibilityServiceEnabled()
+    }
+
+    private fun withPermissions(action: () -> Unit) {
+        if (hasPermissions()) {
+            action()
+        } else {
+            Toast.makeText(this, R.string.toast_need_permissions, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun withPermissionsAndLanguages(action: () -> Unit) {
+        if (dbHelper.getAllLanguages().isEmpty()) {
+            Toast.makeText(this, R.string.toast_add_language, Toast.LENGTH_SHORT).show()
+            return
+        }
+        withPermissions(action)
+    }
+
     private fun updateUiState() {
-        val hasOverlay = Settings.canDrawOverlays(this)
-        val hasAccessibility = isAccessibilityServiceEnabled()
-        val allPermissionsGranted = hasOverlay && hasAccessibility
+        val allPermissionsGranted = hasPermissions()
         val alphaValue = if (allPermissionsGranted) 1.0f else 0.4f
 
         val restrictedViews = listOf(
@@ -233,21 +214,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updatePermissionButtonsState() {
-        if (Settings.canDrawOverlays(this)) {
-            btnOverlayPermission.visibility = View.GONE
-        } else {
-            btnOverlayPermission.visibility = View.VISIBLE
-        }
-
-        if (isAccessibilityServiceEnabled()) {
-            btnAccessibilityPermission.visibility = View.GONE
-        } else {
-            btnAccessibilityPermission.visibility = View.VISIBLE
-        }
+        btnOverlayPermission.visibility = if (Settings.canDrawOverlays(this)) View.GONE else View.VISIBLE
+        btnAccessibilityPermission.visibility = if (isAccessibilityServiceEnabled()) View.GONE else View.VISIBLE
     }
 
     // ==========================================
-    // --- DATABASE VIEWING WITH DELIMITERS ---
+    // --- DATABASE VIEWING ---
     // ==========================================
 
     private fun getDelimiterNames(): Array<String> {
@@ -275,11 +247,10 @@ class MainActivity : AppCompatActivity() {
         val btnSrc = dialogView.findViewById<MaterialButton>(R.id.btnFilterSrc)
 
         setupSpinner(spinner)
-        selectedLangIds.clear() // Reset to ALL on open
+        selectedLangIds.clear()
         selectedSrcIds.clear()
 
         val refreshContent = {
-            // Fetch filtered words
             val words = dbHelper.getWordsFiltered(
                 if (selectedLangIds.isEmpty()) null else selectedLangIds.toList(),
                 if (selectedSrcIds.isEmpty()) null else selectedSrcIds.toList()
@@ -313,8 +284,8 @@ class MainActivity : AppCompatActivity() {
                         val yearText = "$year\n"
                         val start = sb.length
                         sb.append(yearText)
-                        sb.setSpan(android.text.style.RelativeSizeSpan(1.6f), start, sb.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        sb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, sb.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        sb.setSpan(RelativeSizeSpan(1.6f), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        sb.setSpan(StyleSpan(Typeface.BOLD), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                         lastYear = year; lastMonth = -1; lastDay = -1
                     }
                     if (month != lastMonth) {
@@ -322,8 +293,8 @@ class MainActivity : AppCompatActivity() {
                         val monthText = "  📁 $monthName\n"
                         val start = sb.length
                         sb.append(monthText)
-                        sb.setSpan(android.text.style.RelativeSizeSpan(1.3f), start, sb.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        sb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, sb.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        sb.setSpan(RelativeSizeSpan(1.3f), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        sb.setSpan(StyleSpan(Typeface.BOLD), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                         lastMonth = month; lastDay = -1
                     }
                     if (day != lastDay) {
@@ -331,11 +302,10 @@ class MainActivity : AppCompatActivity() {
                         val dayText = "    $day\n"
                         val start = sb.length
                         sb.append(dayText)
-                        sb.setSpan(android.text.style.RelativeSizeSpan(1.15f), start, sb.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        sb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, sb.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        sb.setSpan(RelativeSizeSpan(1.15f), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        sb.setSpan(StyleSpan(Typeface.BOLD), start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                         lastDay = day
                     }
-
                     dayWords.add(word.word)
                 }
                 flushDayWords()
@@ -343,37 +313,33 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Initial setup
-        btnLang.text = "Languages (All)"
-        btnSrc.text = "Sources (All)"
+        btnLang.text = getString(R.string.btn_languages_all)
+        btnSrc.text = getString(R.string.btn_sources_all)
 
         btnLang.setOnClickListener {
             val allLangs = dbHelper.getAllLanguages()
             val langs = allLangs.map { Pair(it.id, "${it.name} (${it.abbreviation})") }
             val showAll = allLangs.size > 1
 
-            showMultiSelectDialog("Filter Languages", langs, selectedLangIds, showAllOption = showAll) { selection ->
+            showMultiSelectDialog(getString(R.string.filter_languages), langs, selectedLangIds, showAllOption = showAll) { selection ->
                 selectedLangIds = selection.toMutableSet()
-                btnLang.text = if (selection.isEmpty()) "Languages (All)" else "Languages (${selection.size})"
-
+                btnLang.text = if (selection.isEmpty()) getString(R.string.btn_languages_all) else getString(R.string.btn_languages_count, selection.size)
                 selectedSrcIds.clear()
 
-                // FIXED LOGIC: Check how many sources exist for the new language
                 val langsToFetch = if (selectedLangIds.isEmpty()) dbHelper.getAllLanguages().map { it.id } else selectedLangIds.toList()
                 val allSources = mutableListOf<Source>()
                 langsToFetch.forEach { allSources.addAll(dbHelper.getSourcesForLanguage(it)) }
 
-                if (allSources.size == 1) {
-                    val singleSource = allSources.first()
-                    selectedSrcIds.add(singleSource.id)
-                    val langAbbrev = dbHelper.getLanguageById(singleSource.languageId)?.abbreviation ?: ""
-                    btnSrc.text = "${singleSource.name} ($langAbbrev)"
-                } else if (allSources.size > 1) {
-                    btnSrc.text = "Sources (All)"
-                } else {
-                    btnSrc.text = "Sources (None)"
+                when {
+                    allSources.size == 1 -> {
+                        val singleSource = allSources.first()
+                        selectedSrcIds.add(singleSource.id)
+                        val langAbbrev = dbHelper.getLanguageById(singleSource.languageId)?.abbreviation ?: ""
+                        btnSrc.text = "${singleSource.name} ($langAbbrev)"
+                    }
+                    allSources.size > 1 -> btnSrc.text = getString(R.string.btn_sources_all)
+                    else -> btnSrc.text = getString(R.string.btn_sources_none)
                 }
-
                 refreshContent()
             }
         }
@@ -389,16 +355,16 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (srcPairs.size > 1) {
-                showMultiSelectDialog("Filter Sources", srcPairs, selectedSrcIds, showAllOption = true) { selection ->
+                showMultiSelectDialog(getString(R.string.filter_sources), srcPairs, selectedSrcIds, showAllOption = true) { selection ->
                     selectedSrcIds = selection.toMutableSet()
-                    btnSrc.text = if (selection.isEmpty()) "Sources (All)" else "Sources (${selection.size})"
+                    btnSrc.text = if (selection.isEmpty()) getString(R.string.btn_sources_all) else getString(R.string.btn_sources_count, selection.size)
                     refreshContent()
                 }
             } else if (srcPairs.size == 1) {
                 selectedSrcIds = mutableSetOf(srcPairs.first().first)
                 btnSrc.text = srcPairs.first().second
                 refreshContent()
-                Toast.makeText(this, "Selected only available source", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.toast_selected_only_source, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -436,36 +402,33 @@ class MainActivity : AppCompatActivity() {
             tvContent.text = if (words.isEmpty()) getString(R.string.dialog_db_empty) else words.joinToString(delimiter) { it.word }
         }
 
-        btnLang.text = "Languages (All)"
-        btnSrc.text = "Sources (All)"
+        btnLang.text = getString(R.string.btn_languages_all)
+        btnSrc.text = getString(R.string.btn_sources_all)
 
         btnLang.setOnClickListener {
             val allLangs = dbHelper.getAllLanguages()
             val langs = allLangs.map { Pair(it.id, "${it.name} (${it.abbreviation})") }
             val showAll = allLangs.size > 1
 
-            showMultiSelectDialog("Filter Languages", langs, selectedLangIds, showAllOption = showAll) { selection ->
+            showMultiSelectDialog(getString(R.string.filter_languages), langs, selectedLangIds, showAllOption = showAll) { selection ->
                 selectedLangIds = selection.toMutableSet()
-                btnLang.text = if (selection.isEmpty()) "Languages (All)" else "Languages (${selection.size})"
-
+                btnLang.text = if (selection.isEmpty()) getString(R.string.btn_languages_all) else getString(R.string.btn_languages_count, selection.size)
                 selectedSrcIds.clear()
 
-                // FIXED LOGIC: Check how many sources exist for the new language
                 val langsToFetch = if (selectedLangIds.isEmpty()) dbHelper.getAllLanguages().map { it.id } else selectedLangIds.toList()
                 val allSources = mutableListOf<Source>()
                 langsToFetch.forEach { allSources.addAll(dbHelper.getSourcesForLanguage(it)) }
 
-                if (allSources.size == 1) {
-                    val singleSource = allSources.first()
-                    selectedSrcIds.add(singleSource.id)
-                    val langAbbrev = dbHelper.getLanguageById(singleSource.languageId)?.abbreviation ?: ""
-                    btnSrc.text = "${singleSource.name} ($langAbbrev)"
-                } else if (allSources.size > 1) {
-                    btnSrc.text = "Sources (All)"
-                } else {
-                    btnSrc.text = "Sources (None)"
+                when {
+                    allSources.size == 1 -> {
+                        val singleSource = allSources.first()
+                        selectedSrcIds.add(singleSource.id)
+                        val langAbbrev = dbHelper.getLanguageById(singleSource.languageId)?.abbreviation ?: ""
+                        btnSrc.text = "${singleSource.name} ($langAbbrev)"
+                    }
+                    allSources.size > 1 -> btnSrc.text = getString(R.string.btn_sources_all)
+                    else -> btnSrc.text = getString(R.string.btn_sources_none)
                 }
-
                 refreshContent()
             }
         }
@@ -481,16 +444,16 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (srcPairs.size > 1) {
-                showMultiSelectDialog("Filter Sources", srcPairs, selectedSrcIds, showAllOption = true) { selection ->
+                showMultiSelectDialog(getString(R.string.filter_sources), srcPairs, selectedSrcIds, showAllOption = true) { selection ->
                     selectedSrcIds = selection.toMutableSet()
-                    btnSrc.text = if (selection.isEmpty()) "Sources (All)" else "Sources (${selection.size})"
+                    btnSrc.text = if (selection.isEmpty()) getString(R.string.btn_sources_all) else getString(R.string.btn_sources_count, selection.size)
                     refreshContent()
                 }
             } else if (srcPairs.size == 1) {
                 selectedSrcIds = mutableSetOf(srcPairs.first().first)
                 btnSrc.text = srcPairs.first().second
                 refreshContent()
-                Toast.makeText(this, "Selected only available source", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.toast_selected_only_source, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -509,7 +472,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ==========================================
-    // --- EXPORT ALL WITH METADATA ---
+    // --- EXPORT DIALOG ---
     // ==========================================
 
     @SuppressLint("MissingInflatedId")
@@ -517,36 +480,31 @@ class MainActivity : AppCompatActivity() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_export_all, null)
         val spinner = dialogView.findViewById<Spinner>(R.id.spinnerExportDelimiter)
         val cbMetadata = dialogView.findViewById<CheckBox>(R.id.cbIncludeMetadata)
-        val tvWarning = dialogView.findViewById<TextView>(R.id.tvMetadataWarning) // Assuming you add an ID to the warning text in XML
+        val tvWarning = dialogView.findViewById<TextView>(R.id.tvMetadataWarning)
         val btnLang = dialogView.findViewById<MaterialButton>(R.id.btnExportFilterLang)
         val btnSrc = dialogView.findViewById<MaterialButton>(R.id.btnExportFilterSrc)
 
         setupSpinner(spinner)
 
-        // Hide metadata option if it's a normal export
         if (!isExportAll) {
             cbMetadata.visibility = View.GONE
             tvWarning.visibility = View.GONE
         }
 
-        // Local filter states for this dialog
         var exportLangIds: Set<Int> = emptySet()
         var exportSrcIds: Set<Int> = emptySet()
 
-        // Update button labels based on current selection
         fun updateFilterLabels() {
-            btnLang.text = if (exportLangIds.isEmpty()) "Languages (All)" else "Languages (${exportLangIds.size})"
+            btnLang.text = if (exportLangIds.isEmpty()) getString(R.string.btn_languages_all) else getString(R.string.btn_languages_count, exportLangIds.size)
 
-            // If no language selected (All), but only 1 language exists in DB, we display that 1 source directly
             val langsToFetch = if (exportLangIds.isEmpty()) dbHelper.getAllLanguages().map { it.id } else exportLangIds.toList()
             val allSources = mutableListOf<Source>()
             langsToFetch.forEach { allSources.addAll(dbHelper.getSourcesForLanguage(it)) }
 
             if (allSources.size <= 1) {
-                // If there is 0 or 1 source total in this context, show its name
-                btnSrc.text = if (allSources.isEmpty()) "Sources (None)" else allSources.first().name
+                btnSrc.text = if (allSources.isEmpty()) getString(R.string.btn_sources_none) else allSources.first().name
             } else {
-                btnSrc.text = if (exportSrcIds.isEmpty()) "Sources (All)" else "Sources (${exportSrcIds.size})"
+                btnSrc.text = if (exportSrcIds.isEmpty()) getString(R.string.btn_sources_all) else getString(R.string.btn_sources_count, exportSrcIds.size)
             }
         }
 
@@ -557,9 +515,9 @@ class MainActivity : AppCompatActivity() {
             val langs = allLangs.map { Pair(it.id, "${it.name} (${it.abbreviation})") }
             val showAll = allLangs.size > 1
 
-            showMultiSelectDialog("Filter Languages", langs, exportLangIds, showAllOption = showAll) { selection ->
+            showMultiSelectDialog(getString(R.string.filter_languages), langs, exportLangIds, showAllOption = showAll) { selection ->
                 exportLangIds = selection
-                exportSrcIds = emptySet() // Reset sources when language changes
+                exportSrcIds = emptySet()
                 updateFilterLabels()
             }
         }
@@ -575,12 +533,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (srcPairs.size > 1) {
-                showMultiSelectDialog("Filter Sources", srcPairs, exportSrcIds, showAllOption = true) { selection ->
+                showMultiSelectDialog(getString(R.string.filter_sources), srcPairs, exportSrcIds, showAllOption = true) { selection ->
                     exportSrcIds = selection
                     updateFilterLabels()
                 }
             } else {
-                Toast.makeText(this, "Only one source available for the selected languages", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.toast_selected_only_source, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -597,11 +555,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun executeExport(isExportAll: Boolean, langIds: Set<Int>, srcIds: Set<Int>, delimiter: String, includeMetadata: Boolean) {
-        // Fetch words based on filters
         val wordsToExport = dbHelper.getWordsFiltered(
             if (langIds.isEmpty()) null else langIds.toList(),
             if (srcIds.isEmpty()) null else srcIds.toList(),
-            onlyUnexported = !isExportAll // If not "Export All", only take unexported
+            onlyUnexported = !isExportAll
         )
 
         if (wordsToExport.isEmpty()) {
@@ -624,7 +581,6 @@ class MainActivity : AppCompatActivity() {
     private fun buildMetadataString(words: List<com.example.anen.data.Word>): String {
         val sb = StringBuilder()
         sb.append("\n\n--- METADATA START ---\n")
-        // New format includes Language Name and Source Name
         sb.append("id|word|language_name|source_name|created_at|is_exported\n")
 
         for (w in words) {
@@ -637,9 +593,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ==========================================
-    // --- OTHER EXPORT / IMPORT / APP SELECT ---
+    // --- FILE I/O ---
     // ==========================================
-
 
     private fun writeWordsToFile(uri: Uri) {
         lifecycleScope.launch {
@@ -647,11 +602,8 @@ class MainActivity : AppCompatActivity() {
                 withContext(Dispatchers.IO) {
                     contentResolver.openOutputStream(uri)?.use { outputStream ->
                         val writer = OutputStreamWriter(outputStream)
-                        val mainContent = pendingExportWords.joinToString(exportDelimiter)
-                        writer.write(mainContent)
-                        if (pendingMetadata.isNotEmpty()) {
-                            writer.write(pendingMetadata)
-                        }
+                        writer.write(pendingExportWords.joinToString(exportDelimiter))
+                        if (pendingMetadata.isNotEmpty()) writer.write(pendingMetadata)
                         writer.flush()
                     }
                 }
@@ -678,17 +630,13 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (fileContent.isBlank()) {
-                    Toast.makeText(this@MainActivity, "File is empty", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, R.string.toast_file_empty, Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
                 val hasMetadata = fileContent.contains("--- METADATA START ---")
-
-                if (hasMetadata) {
-                    processImportWithMetadata(fileContent)
-                } else {
-                    processImportWithoutMetadata(fileContent)
-                }
+                if (hasMetadata) processImportWithMetadata(fileContent)
+                else processImportWithoutMetadata(fileContent)
 
             } catch (e: Exception) {
                 Toast.makeText(this@MainActivity, R.string.toast_io_error, Toast.LENGTH_SHORT).show()
@@ -700,13 +648,8 @@ class MainActivity : AppCompatActivity() {
         val wordsPart = fullContent.substringBefore("--- METADATA START ---").trim()
         val metadataPart = fullContent.substringAfter("--- METADATA START ---").substringBefore("--- METADATA END ---").trim()
 
-        // 1. Parse words
-        val wordsToImport = wordsPart.split(Regex("[|;:,\\t\\n\\s]+"))
-            .map { it.trim().lowercase() }.filter { it.isNotEmpty() }.distinct()
-
-        // 2. Parse metadata to find required languages and sources
         val requiredLangs = mutableSetOf<String>()
-        val requiredSrcs = mutableSetOf<Pair<String, String>>() // Pair<SourceName, LangName>
+        val requiredSrcs = mutableSetOf<Pair<String, String>>()
 
         val lines = metadataPart.lines().filter { it.isNotBlank() && !it.contains("id|word") }
         for (line in lines) {
@@ -721,7 +664,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 3. Check which ones are missing in the DB
         val existingLangs = dbHelper.getAllLanguages().map { it.name }
         val missingLangs = requiredLangs.filter { !existingLangs.contains(it) }
 
@@ -729,59 +671,52 @@ class MainActivity : AppCompatActivity() {
         for (srcPair in requiredSrcs) {
             val lang = dbHelper.getAllLanguages().find { it.name == srcPair.second }
             if (lang != null) {
-                // If language exists, check if source exists for it
                 val existingSrcs = dbHelper.getSourcesForLanguage(lang.id).map { it.name }
-                if (!existingSrcs.contains(srcPair.first)) {
-                    missingSrcs.add(srcPair)
-                }
+                if (!existingSrcs.contains(srcPair.first)) missingSrcs.add(srcPair)
             } else {
-                // If language is missing, the source is definitely missing
                 if (!missingSrcs.contains(srcPair)) missingSrcs.add(srcPair)
             }
         }
 
-        // 4. If there are missing components, show confirmation dialog
         if (missingLangs.isNotEmpty() || missingSrcs.isNotEmpty()) {
+            val langsText = if (missingLangs.isNotEmpty()) getString(R.string.dialog_missing_components_lang_header, missingLangs.joinToString(", ")) else ""
+            val srcsText = if (missingSrcs.isNotEmpty()) getString(R.string.dialog_missing_components_src_header, missingSrcs.map { "${it.first} (${it.second})" }.joinToString(", ")) else ""
+
             val message = buildString {
-                append("The file contains new languages or sources:\n\n")
-                if (missingLangs.isNotEmpty()) append("Languages: ${missingLangs.joinToString(", ")}\n")
-                if (missingSrcs.isNotEmpty()) append("Sources: ${missingSrcs.map { "${it.first} (${it.second})" }.joinToString(", ")}\n\n")
-                append("Do you want to create them and import the words?")
+                append(langsText)
+                if (langsText.isNotEmpty() && srcsText.isNotEmpty()) append("\n")
+                append(srcsText)
+                append("\n\n")
+                append(getString(R.string.dialog_missing_components_question))
             }
 
             AlertDialog.Builder(this)
-                .setTitle("Missing Components")
+                .setTitle(R.string.dialog_missing_components_title)
                 .setMessage(message)
-                .setPositiveButton("Create & Import") { _, _ ->
-                    // Create missing entities
+                .setPositiveButton(R.string.btn_create_import) { _, _ ->
                     for (l in missingLangs) {
                         val newLangId = dbHelper.addLanguage(l, l.take(3))
-                        // Create a default source for the new language just in case
                         if (newLangId > 0) dbHelper.addSource(newLangId.toInt(), "Default", "Def")
                     }
                     for (s in missingSrcs) {
                         val lang = dbHelper.getAllLanguages().find { it.name == s.second }
-                        if (lang != null) {
-                            dbHelper.addSource(lang.id, s.first, s.first.take(3))
-                        }
+                        if (lang != null) dbHelper.addSource(lang.id, s.first, s.first.take(3))
                     }
                     performActualImport(wordsPart, metadataPart)
                 }
-                .setNegativeButton("Skip", null)
+                .setNegativeButton(R.string.btn_skip, null)
                 .show()
         } else {
-            // Everything exists, import directly
             performActualImport(wordsPart, metadataPart)
         }
     }
 
     private fun performActualImport(wordsPart: String, metadataPart: String) {
-        // FIX: Extract all words that actually exist in the top part of the file
         val validWords = wordsPart.split(Regex("[|;:,\\t\\n\\s]+"))
             .map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toSet()
 
         if (validWords.isEmpty()) {
-            Toast.makeText(this, "No valid words in the file header", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.toast_no_valid_header, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -793,8 +728,6 @@ class MainActivity : AppCompatActivity() {
                 val parts = line.split("|")
                 if (parts.size >= 6) {
                     val wordText = parts[1].trim().lowercase()
-
-                    // FIX: Skip if the word is not in the actual file header
                     if (!validWords.contains(wordText)) continue
 
                     val langName = parts[2].trim()
@@ -808,7 +741,6 @@ class MainActivity : AppCompatActivity() {
                             ?: dbHelper.getSourcesForLanguage(lang.id).firstOrNull()
 
                         if (src != null) {
-                            // Direct insert to preserve timestamp and export status
                             val db = dbHelper.writableDatabase
                             val values = android.content.ContentValues().apply {
                                 put("word", wordText)
@@ -825,7 +757,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@MainActivity, "Imported $count words with history", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@MainActivity, getString(R.string.toast_imported_history, count), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -835,11 +767,10 @@ class MainActivity : AppCompatActivity() {
             .map { it.trim().lowercase() }.filter { it.isNotEmpty() }.distinct()
 
         if (wordsToImport.isEmpty()) {
-            Toast.makeText(this, "No valid words found", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.toast_no_valid_words, Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Show dialog asking for Language and Source
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_import_no_meta, null)
         val spinnerLang = view.findViewById<Spinner>(R.id.spinnerImportLang)
         val spinnerSrc = view.findViewById<Spinner>(R.id.spinnerImportSrc)
@@ -863,10 +794,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Select Import Destination")
-            .setMessage("Choose where to put the imported words:")
+            .setTitle(R.string.dialog_import_destination_title)
+            .setMessage(R.string.dialog_import_destination_message)
             .setView(view)
-            .setPositiveButton("Import") { _, _ ->
+            .setPositiveButton(R.string.btn_import_action) { _, _ ->
                 val selectedLang = languages[spinnerLang.selectedItemPosition]
                 val sources = dbHelper.getSourcesForLanguage(selectedLang.id)
                 val selectedSrc = sources[spinnerSrc.selectedItemPosition]
@@ -877,20 +808,24 @@ class MainActivity : AppCompatActivity() {
                         if (dbHelper.addWord(word, selectedLang.id, selectedSrc.id)) count++
                     }
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "Imported $count words", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@MainActivity, getString(R.string.toast_imported_words, count), Toast.LENGTH_LONG).show()
                     }
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
+
+    // ==========================================
+    // --- SETTINGS ---
+    // ==========================================
 
     private fun showSettingsMenu() {
         val options = arrayOf(
             getString(R.string.settings_theme),
-            "Working Languages",
-            "Working Sources",
-            getString(R.string.settings_general), // NEW
+            getString(R.string.working_languages_title),
+            getString(R.string.working_sources_title),
+            getString(R.string.settings_general),
             getString(R.string.settings_about)
         )
         AlertDialog.Builder(this)
@@ -901,17 +836,18 @@ class MainActivity : AppCompatActivity() {
                     1 -> startActivity(Intent(this, WorkingLanguagesActivity::class.java))
                     2 -> {
                         if (dbHelper.getAllLanguages().isEmpty()) {
-                            Toast.makeText(this, "Please add at least one language first.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, R.string.toast_add_language, Toast.LENGTH_SHORT).show()
                         } else {
                             startActivity(Intent(this, WorkingSourcesActivity::class.java))
                         }
                     }
-                    3 -> startActivity(Intent(this, GeneralSettingsActivity::class.java)) // NEW
+                    3 -> startActivity(Intent(this, GeneralSettingsActivity::class.java))
                     4 -> showAboutDialog()
                 }
             }
             .show()
     }
+
     private fun showThemeDialog() {
         val themes = arrayOf(
             getString(R.string.theme_monochrome),
@@ -940,7 +876,6 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-
     private fun showAboutDialog() {
         val message = """
             ${getString(R.string.about_version)}
@@ -963,11 +898,8 @@ class MainActivity : AppCompatActivity() {
         val methodKeys = arrayOf("swipe", "back_button", "tile_only")
         val methodNames = arrayOf(
             getString(R.string.method_swipe),
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                getString(R.string.method_back_button_unavailable)
-            } else {
-                getString(R.string.method_back_button)
-            },
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) getString(R.string.method_back_button_unavailable)
+            else getString(R.string.method_back_button),
             getString(R.string.method_tile_only)
         )
 
@@ -975,10 +907,8 @@ class MainActivity : AppCompatActivity() {
         val currentIndex = methodKeys.indexOf(currentMethod).coerceAtLeast(0)
 
         val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_list_item_single_choice, methodNames) {
-            override fun isEnabled(position: Int): Boolean {
-                return !(position == 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            }
-            override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+            override fun isEnabled(position: Int): Boolean = !(position == 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent)
                 view.alpha = if (isEnabled(position)) 1f else 0.4f
                 return view
@@ -999,6 +929,10 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    // ==========================================
+    // --- PERMISSIONS ---
+    // ==========================================
+
     private fun requestOverlayPermission() {
         if (!Settings.canDrawOverlays(this)) {
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, "package:$packageName".toUri())
@@ -1017,13 +951,14 @@ class MainActivity : AppCompatActivity() {
         val colonSplitter = android.text.TextUtils.SimpleStringSplitter(':')
         colonSplitter.setString(enabledServices)
         while (colonSplitter.hasNext()) {
-            val componentName = colonSplitter.next()
-            if (componentName.equals(expectedService, ignoreCase = true)) {
-                return true
-            }
+            if (colonSplitter.next().equals(expectedService, ignoreCase = true)) return true
         }
         return false
     }
+
+    // ==========================================
+    // --- APP SELECTION ---
+    // ==========================================
 
     private fun showAppSelectionDialog() {
         val pm = packageManager
@@ -1035,28 +970,22 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Map to our custom AppInfo data class, including the icon
         val appList = apps.map {
             val label = pm.getApplicationLabel(it).toString()
             val icon = pm.getApplicationIcon(it)
             AppInfo(label, it.packageName, icon)
         }.sortedBy { it.name }
 
-        // Inflate custom dialog layout
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_select_app, null)
         val etSearch = dialogView.findViewById<TextInputEditText>(R.id.etSearchApp)
         val lvApps = dialogView.findViewById<ListView>(R.id.lvApps)
 
-        val currentTargets = preferencesManager.getTargetPackages()
-        val adapter = AppSelectionAdapter(this, appList, currentTargets)
+        val adapter = AppSelectionAdapter(this, appList, preferencesManager.getTargetPackages())
         lvApps.adapter = adapter
 
-        // Add text watcher for live search
         etSearch.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                adapter.filter.filter(s)
-            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { adapter.filter.filter(s) }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
@@ -1064,7 +993,6 @@ class MainActivity : AppCompatActivity() {
             .setTitle(R.string.dialog_select_app_title)
             .setView(dialogView)
             .setPositiveButton(R.string.btn_close) { _, _ ->
-                // Save the selected packages from the adapter
                 preferencesManager.setTargetPackages(adapter.getSelectedPackages())
                 updateTargetAppButton()
             }
@@ -1075,51 +1003,48 @@ class MainActivity : AppCompatActivity() {
     private fun updateTargetAppButton() {
         val targetPackages = preferencesManager.getTargetPackages()
 
-        if (targetPackages.isEmpty()) {
-            btnSelectApp.text = getString(R.string.btn_select_app)
-        } else if (targetPackages.size == 1) {
-            try {
-                val appInfo = packageManager.getApplicationInfo(targetPackages.first(), 0)
-                val appName = packageManager.getApplicationLabel(appInfo).toString()
-                btnSelectApp.text = getString(R.string.btn_select_app_selected, appName)
-            } catch (_: PackageManager.NameNotFoundException) {
-                btnSelectApp.text = getString(R.string.btn_select_app)
+        when {
+            targetPackages.isEmpty() -> btnSelectApp.text = getString(R.string.btn_select_app)
+            targetPackages.size == 1 -> {
+                try {
+                    val appInfo = packageManager.getApplicationInfo(targetPackages.first(), 0)
+                    val appName = packageManager.getApplicationLabel(appInfo).toString()
+                    btnSelectApp.text = getString(R.string.btn_select_app_selected, appName)
+                } catch (_: PackageManager.NameNotFoundException) {
+                    btnSelectApp.text = getString(R.string.btn_select_app)
+                }
             }
-        } else {
-            btnSelectApp.text = getString(R.string.btn_select_app_multiple, targetPackages.size)
+            else -> btnSelectApp.text = getString(R.string.btn_select_app_multiple, targetPackages.size)
         }
     }
+
+    // ==========================================
+    // --- MULTI-SELECT DIALOG ---
+    // ==========================================
 
     private fun showMultiSelectDialog(
         title: String,
         items: List<Pair<Int, String>>,
         currentlySelected: Set<Int>,
-        showAllOption: Boolean = true, // NEW: Toggle for "All" option
+        showAllOption: Boolean = true,
         onSave: (Set<Int>) -> Unit
     ) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_multi_select, null)
         val lv = dialogView.findViewById<ListView>(R.id.lvMultiSelect)
 
-        // Create list with optional "All" at the top
         val listItems = mutableListOf<Pair<Int, String>>()
-        if (showAllOption) {
-            listItems.add(Pair(-1, "All"))
-        }
+        if (showAllOption) listItems.add(Pair(-1, getString(R.string.option_all)))
         listItems.addAll(items)
 
         val checkedStates = BooleanArray(listItems.size)
         val offset = if (showAllOption) 1 else 0
 
-        // Setup initial checks
         if (currentlySelected.isEmpty()) {
-            // Empty means ALL (check everything)
             for (i in checkedStates.indices) checkedStates[i] = true
         } else {
             if (showAllOption) checkedStates[0] = false
             for (i in offset until listItems.size) {
-                if (currentlySelected.contains(listItems[i].first)) {
-                    checkedStates[i] = true
-                }
+                if (currentlySelected.contains(listItems[i].first)) checkedStates[i] = true
             }
         }
 
@@ -1138,21 +1063,14 @@ class MainActivity : AppCompatActivity() {
 
                 view.setOnClickListener {
                     if (showAllOption && position == 0) {
-                        // Clicked "All"
                         val newState = !checkedStates[0]
                         for (i in checkedStates.indices) checkedStates[i] = newState
                     } else {
-                        // Clicked specific item
                         checkedStates[position] = !checkedStates[position]
-
                         if (showAllOption) {
-                            // Update "All" checkbox state
                             var allChecked = true
                             for (i in 1 until checkedStates.size) {
-                                if (!checkedStates[i]) {
-                                    allChecked = false
-                                    break
-                                }
+                                if (!checkedStates[i]) { allChecked = false; break }
                             }
                             checkedStates[0] = allChecked
                         }
@@ -1173,24 +1091,21 @@ class MainActivity : AppCompatActivity() {
                 var isAllSelected = if (showAllOption) checkedStates[0] else false
 
                 for (i in offset until checkedStates.size) {
-                    if (checkedStates[i]) {
-                        newSelection.add(listItems[i].first)
-                    }
+                    if (checkedStates[i]) newSelection.add(listItems[i].first)
                 }
 
-                if (showAllOption && newSelection.size == items.size && items.isNotEmpty()) {
-                    isAllSelected = true
-                }
+                if (showAllOption && newSelection.size == items.size && items.isNotEmpty()) isAllSelected = true
 
-                if (isAllSelected || newSelection.isEmpty()) {
-                    onSave(emptySet()) // Empty set means ALL
-                } else {
-                    onSave(newSelection)
-                }
+                if (isAllSelected || newSelection.isEmpty()) onSave(emptySet())
+                else onSave(newSelection)
             }
             .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
+
+    // ==========================================
+    // --- LANGUAGE & SOURCE BUTTONS ---
+    // ==========================================
 
     private fun updateSwitchState() {
         switchService.isChecked = preferencesManager.isServiceEnabled()
@@ -1199,7 +1114,6 @@ class MainActivity : AppCompatActivity() {
     private fun updateLanguageAndSourceButtons() {
         val languages = dbHelper.getAllLanguages()
 
-        // BUG 4 FIX: If 0 languages, hide both buttons
         if (languages.isEmpty()) {
             btnLanguages.visibility = View.GONE
             btnSources.visibility = View.GONE
@@ -1208,18 +1122,15 @@ class MainActivity : AppCompatActivity() {
             btnSources.visibility = View.VISIBLE
         }
 
-        // BUG 2 FIX: Fallback if default language was deleted
         var defaultLangId = preferencesManager.getDefaultLanguageId()
         var defaultLang = dbHelper.getLanguageById(defaultLangId)
 
         if (defaultLang == null) {
-            // Auto-select the first available language
             defaultLang = languages.first()
             defaultLangId = defaultLang.id
             preferencesManager.setDefaultLanguageId(defaultLangId)
         }
 
-        // UI update for Languages button
         if (languages.size <= 1) {
             btnLanguages.visibility = View.GONE
             val params = btnSources.layoutParams as LinearLayout.LayoutParams
@@ -1236,7 +1147,6 @@ class MainActivity : AppCompatActivity() {
 
         btnLanguages.text = defaultLang.abbreviation
 
-        // Check default source (fallback to first if deleted)
         val sources = dbHelper.getSourcesForLanguage(defaultLangId)
         var defaultSrcId = preferencesManager.getDefaultSourceId()
         var defaultSrc = sources.find { it.id == defaultSrcId }
@@ -1258,12 +1168,11 @@ class MainActivity : AppCompatActivity() {
         val currentIndex = languages.indexOfFirst { it.id == currentId }.coerceAtLeast(0)
 
         AlertDialog.Builder(this)
-            .setTitle("Select Default Language")
+            .setTitle(R.string.dialog_select_lang_title)
             .setSingleChoiceItems(names, currentIndex) { dialog, which ->
                 val selected = languages[which]
                 preferencesManager.setDefaultLanguageId(selected.id)
 
-                // When language changes, default source must change to the first available source of that language
                 val sources = dbHelper.getSourcesForLanguage(selected.id)
                 if (sources.isNotEmpty()) {
                     preferencesManager.setDefaultSourceId(sources.first().id)
@@ -1286,7 +1195,7 @@ class MainActivity : AppCompatActivity() {
         val currentIndex = sources.indexOfFirst { it.id == currentId }.coerceAtLeast(0)
 
         AlertDialog.Builder(this)
-            .setTitle("Select Default Source")
+            .setTitle(R.string.dialog_select_src_title)
             .setSingleChoiceItems(names, currentIndex) { dialog, which ->
                 preferencesManager.setDefaultSourceId(sources[which].id)
                 updateLanguageAndSourceButtons()

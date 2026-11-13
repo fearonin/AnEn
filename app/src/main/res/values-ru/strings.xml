@@ -20,7 +20,8 @@
     <!-- Dialogs and Toasts -->
     <string name="dialog_select_app_title">Выберите целевое приложение</string>
     <string name="toast_no_apps_found">Подходящих приложений не найдено</string>
-    <string name="toast_need_permissions">Пожалуйста, сначала предоставьте разрешения</string>
+    <string name="toast_need_permissions">Пожалуйста, сначала предоставьте все разрешения</string>
+    <string name="toast_add_language">Добавьте хотя бы один язык</string>
 
     <!-- Accessibility Service -->
     <string name="accessibility_service_label">Служба наложения AnEn</string>
@@ -118,4 +119,52 @@
     <string name="save_languages">Сохранить языки</string>
     <string name="save_sources">Сохранить источники</string>
     <string name="clear_tool_type_langs">Введите через запятую названия ВСЕХ ваших языков для подтверждения:</string>
+    <string name="toast_no_words_to_clear">У вас должно быть хотя бы 1 слово для очистки</string>
+
+    <!-- Missing Translations -->
+    <string name="dialog_select_lang_title">Выбрать язык по умолчанию</string>
+    <string name="dialog_select_src_title">Выбрать источник по умолчанию</string>
+    <string name="filter_languages">Фильтр языков</string>
+    <string name="filter_sources">Фильтр источников</string>
+    <string name="option_all">Все</string>
+    <string name="btn_languages_all">Языки (Все)</string>
+    <string name="btn_sources_all">Источники (Все)</string>
+    <string name="btn_languages_count">Языки (%1$d)</string>
+    <string name="btn_sources_count">Источники (%1$d)</string>
+    <string name="btn_sources_none">Источники (Нет)</string>
+    <string name="search_apps_hint">Поиск приложений...</string>
+    <string name="working_languages_title">Рабочие языки</string>
+    <string name="working_sources_title">Рабочие источники</string>
+    <string name="language_name_hint">Название языка</string>
+    <string name="source_name_hint">Название источника</string>
+    <string name="editing_lang_names">Редактирование названий языков</string>
+    <string name="editing_src_names">Редактирование названий источников</string>
+    <string name="editing_abbrev">Редактирование сокращений</string>
+
+    <!-- Import / Metadata Toasts -->
+    <string name="toast_file_empty">Файл пуст</string>
+    <string name="toast_no_valid_header">В заголовке файла нет действительных слов</string>
+    <string name="toast_no_valid_words">Действительные слова не найдены</string>
+    <string name="toast_imported_words">Импортировано %1$d слов</string>
+    <string name="toast_imported_history">Импортировано %1$d слов с историей</string>
+    <string name="toast_selected_only_source">Выбран единственный доступный источник</string>
+
+    <!-- Missing Components Dialog -->
+    <string name="dialog_missing_components_title">Отсутствующие компоненты</string>
+    <string name="dialog_missing_components_lang_header">Языки: %1$s</string>
+    <string name="dialog_missing_components_src_header">Источники: %1$s</string>
+    <string name="dialog_missing_components_question">Хотите создать их и импортировать слова?</string>
+    <string name="btn_create_import">Создать и импортировать</string>
+    <string name="btn_skip">Пропустить</string>
+
+    <!-- Import Destination Dialog -->
+    <string name="dialog_import_destination_title">Выберите место для импорта</string>
+    <string name="dialog_import_destination_message">Выберите, куда поместить импортируемые слова:</string>
+    <string name="btn_import_action">Импортировать</string>
+
+    <string name="add_source_to_lang">Добавить источник для %1$s</string>
+    <string name="dialog_warning_title">Внимание!</string>
+    <string name="delete_source_warning_message">Этот источник содержит %1$d слов. Удаление навсегда удалит их.\n\nВведите \'%2$s\' для подтверждения.</string>
+    <string name="delete_language_warning_message">Этот язык содержит %1$d слов. Удаление навсегда удалит все его источники и слова.\n\nВведите \'%2$s\' для подтверждения.</string>
+    <string name="abbreviation_hint">Сокращение (необязательно, до 3 символов)</string>
 </resources>

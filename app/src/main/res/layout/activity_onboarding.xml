@@ -48,7 +48,7 @@
                 android:id="@+id/etNewLanguage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Language name"
+                android:hint="@string/language_name_hint"
                 android:maxLines="1"/>
         </com.google.android.material.textfield.TextInputLayout>
 

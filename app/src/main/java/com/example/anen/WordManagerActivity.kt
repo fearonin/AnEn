@@ -69,7 +69,11 @@ class WordManagerActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.btnExitManager).setOnClickListener { finish() }
 
         findViewById<MaterialButton>(R.id.btnClearData).setOnClickListener {
-            showClearDatabaseConfirmDialog()
+            if (dbHelper.getTotalWordsCount() == 0) {
+                Toast.makeText(this, R.string.toast_no_words_to_clear, Toast.LENGTH_SHORT).show()
+            } else {
+                showClearDatabaseConfirmDialog()
+            }
         }
 
         loadWords()

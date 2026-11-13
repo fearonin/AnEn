@@ -147,8 +147,8 @@ class WorkingLanguagesActivity : AppCompatActivity() {
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Warning!")
-            .setMessage("This language contains $wordCount words. Deleting it will permanently delete all its sources and words. \n\nType '${language.name}' to confirm.")
+            .setTitle(R.string.dialog_warning_title)
+            .setMessage(getString(R.string.delete_language_warning_message, wordCount, language.name))
             .setView(input)
             .setPositiveButton("Delete") { _, _ ->
                 if (input.text.toString().trim().equals(language.name, ignoreCase = true)) {

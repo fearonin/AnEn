@@ -9,7 +9,8 @@
         android:id="@+id/toolbarSources"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:title="Working Sources"
+        app:title="@string/working_sources_title"
+        app:menu="@menu/menu_sources"
         app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel" />
 
     <androidx.recyclerview.widget.RecyclerView

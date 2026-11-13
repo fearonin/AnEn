@@ -441,4 +441,14 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return getAllLanguages().joinToString(", ") { it.name }
     }
 
+    fun getTotalWordsCount(): Int {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT COUNT(*) FROM $TABLE_WORDS", null)
+        var count = 0
+        if (cursor.moveToFirst()) count = cursor.getInt(0)
+        cursor.close()
+        db.close()
+        return count
+    }
+
 }
