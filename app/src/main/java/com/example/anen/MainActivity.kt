@@ -903,7 +903,14 @@ class MainActivity : AppCompatActivity() {
                 when (which) {
                     0 -> showThemeDialog()
                     1 -> startActivity(Intent(this, WorkingLanguagesActivity::class.java))
-                    2 -> startActivity(Intent(this, WorkingSourcesActivity::class.java)) // NEW
+                    2 -> {
+                        // Check if there is at least one language before opening Sources
+                        if (dbHelper.getAllLanguages().isEmpty()) {
+                            Toast.makeText(this, "Please add at least one language first.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            startActivity(Intent(this, WorkingSourcesActivity::class.java))
+                        }
+                    }
                     3 -> showAboutDialog()
                 }
             }
