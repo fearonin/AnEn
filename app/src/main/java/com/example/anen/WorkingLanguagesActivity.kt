@@ -28,10 +28,16 @@ class WorkingLanguagesActivity : AppCompatActivity() {
 
         dbHelper = DBHelper(this)
 
-        findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbarLanguages).setOnMenuItemClickListener { item ->
+        val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbarLanguages)
+
+        toolbar.setNavigationOnClickListener {
+            finish()
+        }
+
+        toolbar.setOnMenuItemClickListener { item ->
             if (item.itemId == R.id.action_edit) {
                 isEditMode = !isEditMode
-                adapter.notifyDataSetChanged() // Refresh list to update states
+                adapter.notifyDataSetChanged()
                 Toast.makeText(this, if (isEditMode) "Editing Language Names" else "Editing Abbreviations", Toast.LENGTH_SHORT).show()
                 true
             } else false

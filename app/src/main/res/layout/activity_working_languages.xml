@@ -8,16 +8,17 @@
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarLanguages"
-        android:layout_width="391dp"
+        android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:title="Working Languages"
-        app:menu="@menu/menu_languages"
-        app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel" />
+        app:title="Working Languages"
+        app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel"
+        app:menu="@menu/menu_languages" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp">
 
         <com.google.android.material.textfield.TextInputLayout
