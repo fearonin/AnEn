@@ -12,6 +12,8 @@ class PreferencesManager(context: Context) {
         private const val KEY_SERVICE_ENABLED = "service_enabled"
         private const val KEY_THEME = "app_theme"
         private const val KEY_INVOCATION_METHOD = "invocation_method"
+        private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+        private const val KEY_DEFAULT_LANGUAGE_ID = "default_language_id"
     }
 
     fun setTargetPackages(packageNames: Set<String>) {
@@ -44,5 +46,21 @@ class PreferencesManager(context: Context) {
 
     fun getInvocationMethod(): String {
         return prefs.getString(KEY_INVOCATION_METHOD, "swipe") ?: "swipe"
+    }
+
+    fun isOnboardingCompleted(): Boolean {
+        return prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
+    }
+
+    fun setOnboardingCompleted(completed: Boolean) {
+        prefs.edit { putBoolean(KEY_ONBOARDING_COMPLETED, completed) }
+    }
+
+    fun getDefaultLanguageId(): Int {
+        return prefs.getInt(KEY_DEFAULT_LANGUAGE_ID, 1) // Defaults to 1 (English)
+    }
+
+    fun setDefaultLanguageId(id: Int) {
+        prefs.edit { putInt(KEY_DEFAULT_LANGUAGE_ID, id) }
     }
 }

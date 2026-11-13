@@ -71,10 +71,6 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 FOREIGN KEY($COLUMN_SOURCE_ID) REFERENCES $TABLE_SOURCES($COLUMN_ID) ON DELETE CASCADE
             )
         """.trimIndent())
-
-        // Seed initial default data (English + Default Source)
-        db.execSQL("INSERT INTO $TABLE_LANGUAGES ($COLUMN_ID, $COLUMN_NAME, $COLUMN_ABBREVIATION) VALUES (1, 'English', 'Eng')")
-        db.execSQL("INSERT INTO $TABLE_SOURCES ($COLUMN_ID, $COLUMN_LANGUAGE_ID, $COLUMN_NAME, $COLUMN_ABBREVIATION) VALUES (1, 1, 'Default', 'Def')")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -312,4 +308,34 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db.delete(TABLE_WORDS, null, null)
         db.close()
     }
+
+    fun updateLanguage(id: Int, name: String, abbreviation: String) {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_NAME, name)
+            put(COLUMN_ABBREVIATION, abbreviation)
+        }
+        db.update(TABLE_LANGUAGES, values, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+    }
+
+    fun deleteLanguage(id: Int) {
+        val db = this.writableDatabase
+        // Due to ON DELETE CASCADE, this will also delete sources and words!
+        db.delete(TABLE_LANGUAGES, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+    }
+
+    fun getWordCountForLanguage(languageId: Int): Int {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT COUNT(*) FROM $TABLE_WORDS WHERE $COLUMN_LANGUAGE_ID = ?", arrayOf(languageId.toString()))
+        var count = 0
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0)
+        }
+        cursor.close()
+        db.close()
+        return count
+    }
+
 }

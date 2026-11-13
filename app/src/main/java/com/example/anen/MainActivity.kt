@@ -95,6 +95,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        if (!preferencesManager.isOnboardingCompleted()) {
+            startActivity(Intent(this, OnboardingActivity::class.java))
+            finish()
+            return
+        }
+
         dbHelper = DBHelper(this)
         initViews()
         setupListeners()
@@ -491,13 +497,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showSettingsMenu() {
-        val options = arrayOf(getString(R.string.settings_theme), getString(R.string.settings_about))
+        // Added the new item
+        val options = arrayOf(
+            getString(R.string.settings_theme),
+            "Working Languages", // Or add a string resource for this
+            getString(R.string.settings_about)
+        )
         AlertDialog.Builder(this)
             .setTitle(R.string.settings_menu_title)
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> showThemeDialog()
-                    1 -> showAboutDialog()
+                    1 -> startActivity(Intent(this, WorkingLanguagesActivity::class.java))
+                    2 -> showAboutDialog()
                 }
             }
             .show()
@@ -530,6 +542,7 @@ class MainActivity : AppCompatActivity() {
             }
             .show()
     }
+
 
     private fun showAboutDialog() {
         val message = """
