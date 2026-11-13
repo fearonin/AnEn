@@ -497,10 +497,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showSettingsMenu() {
-        // Added the new item
         val options = arrayOf(
             getString(R.string.settings_theme),
-            "Working Languages", // Or add a string resource for this
+            "Working Languages",
+            "Working Sources",
             getString(R.string.settings_about)
         )
         AlertDialog.Builder(this)
@@ -509,12 +509,12 @@ class MainActivity : AppCompatActivity() {
                 when (which) {
                     0 -> showThemeDialog()
                     1 -> startActivity(Intent(this, WorkingLanguagesActivity::class.java))
-                    2 -> showAboutDialog()
+                    2 -> startActivity(Intent(this, WorkingSourcesActivity::class.java)) // NEW
+                    3 -> showAboutDialog()
                 }
             }
             .show()
     }
-
     private fun showThemeDialog() {
         val themes = arrayOf(
             getString(R.string.theme_monochrome),

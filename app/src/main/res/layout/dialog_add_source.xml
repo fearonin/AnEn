@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSourceName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Source Name (e.g. Book, Movie)"
+            android:maxLines="1"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSourceAbbrev"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Abbreviation (optional, max 3)"
+            android:inputType="textCapWords"
+            android:maxLength="3"
+            android:maxLines="1"/>
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>

@@ -338,4 +338,33 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return count
     }
 
+    fun updateSource(id: Int, name: String, abbreviation: String) {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_NAME, name)
+            put(COLUMN_ABBREVIATION, abbreviation)
+        }
+        db.update(TABLE_SOURCES, values, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+    }
+
+    fun deleteSource(id: Int) {
+        val db = this.writableDatabase
+        // Due to ON DELETE CASCADE, this deletes all words associated with this source!
+        db.delete(TABLE_SOURCES, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+    }
+
+    fun getWordCountForSource(sourceId: Int): Int {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT COUNT(*) FROM $TABLE_WORDS WHERE $COLUMN_SOURCE_ID = ?", arrayOf(sourceId.toString()))
+        var count = 0
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0)
+        }
+        cursor.close()
+        db.close()
+        return count
+    }
+
 }

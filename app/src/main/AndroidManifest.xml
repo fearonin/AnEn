@@ -66,6 +66,6 @@
 
         <activity android:name=".OnboardingActivity" android:exported="false" />
         <activity android:name=".WorkingLanguagesActivity" android:exported="false" />
-
+        <activity android:name=".WorkingSourcesActivity" android:exported="false" />
     </application>
 </manifest>
