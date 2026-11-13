@@ -255,7 +255,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return exists
     }
 
-    fun getWordsFiltered(languageIds: List<Int>?, sourceIds: List<Int>?): List<Word> {
+    fun getWordsFiltered(languageIds: List<Int>?, sourceIds: List<Int>?, onlyUnexported: Boolean = false): List<Word> {
         val wordList = mutableListOf<Word>()
         val db = this.readableDatabase
 
@@ -272,6 +272,11 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             val placeholders = sourceIds.joinToString(",") { "?" }
             whereClause += " AND $COLUMN_SOURCE_ID IN ($placeholders)"
             whereArgs.addAll(sourceIds.map { it.toString() })
+        }
+
+        // NEW: Filter only unexported words if requested
+        if (onlyUnexported) {
+            whereClause += " AND $COLUMN_IS_EXPORTED = 0"
         }
 
         val query = "SELECT * FROM $TABLE_WORDS WHERE 1=1 $whereClause ORDER BY $COLUMN_CREATED_AT DESC"
