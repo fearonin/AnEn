@@ -1,0 +1,143 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">AnEn</string>
+
+    <string name="service_toggle_label">サービスの有効化 / 無効化</string>
+    <string name="btn_grant_overlay">オーバーレイの許可を与える</string>
+    <string name="btn_grant_accessibility">ユーザー補助サービスを有効にする</string>
+    <string name="overlay_granted">オーバーレイの許可が与えられました ✓</string>
+    <string name="accessibility_granted">ユーザー補助サービスが有効です ✓</string>
+    <string name="btn_select_app">ターゲットアプリを選択</string>
+    <string name="btn_select_app_selected">ターゲット: %1$s</string>
+    <string name="btn_select_app_multiple">ターゲット: %1$d 個のアプリ</string>
+
+    <string name="accessibility_service_label">AnEn オーバーレイサービス</string>
+    <string name="accessibility_service_description">このサービスはアクティブなアプリを検出し、単語保存オーバーレイを表示します。</string>
+    <string name="tile_label">単語を追加</string>
+    <string name="tile_description">AnEnに新しい単語を追加します</string>
+
+    <string name="input_hint">単語を入力...</string>
+    <string name="btn_save">保存</string>
+
+    <string name="btn_db_normal">データベース (通常表示)</string>
+    <string name="btn_db_raw">データベース (Raw形式)</string>
+    <string name="dialog_db_title">データベース (通常表示)</string>
+    <string name="dialog_db_raw_title">データベース (Raw形式)</string>
+    <string name="dialog_db_empty">データベースは空です</string>
+    <string name="delimiter_label">区切り文字</string>
+    <string name="delimiter_tab">タブ</string>
+    <string name="delimiter_pipe">パイプ (|)</string>
+    <string name="delimiter_semicolon">セミコロン (;)</string>
+    <string name="delimiter_colon">コロン (:)</string>
+    <string name="delimiter_comma">カンマ (,)</string>
+    <string name="delimiter_space">スペース</string>
+
+    <string name="filter_languages">言語でフィルター</string>
+    <string name="filter_sources">ソースでフィルター</string>
+    <string name="option_all">すべて</string>
+    <string name="btn_languages_all">言語 (すべて)</string>
+    <string name="btn_sources_all">ソース (すべて)</string>
+    <string name="btn_languages_count">言語 (%1$d)</string>
+    <string name="btn_sources_count">ソース (%1$d)</string>
+    <string name="btn_sources_none">ソース (なし)</string>
+
+    <string name="working_languages_title">使用言語</string>
+    <string name="working_sources_title">使用ソース</string>
+    <string name="language_name_hint">言語名</string>
+    <string name="source_name_hint">ソース名</string>
+    <string name="abbreviation_hint">略称 (任意、最大3文字)</string>
+    <string name="add_source_to_lang">%1$s にソースを追加</string>
+
+    <string name="dialog_select_lang_title">デフォルト言語を選択</string>
+    <string name="dialog_select_src_title">デフォルトソースを選択</string>
+    <string name="editing_lang_names">言語名を編集</string>
+    <string name="editing_src_names">ソース名を編集</string>
+    <string name="editing_abbrev">略称を編集</string>
+
+    <string name="btn_clear">クリア</string>
+    <string name="word_manager_title">単語の管理</string>
+    <string name="search_words_hint">単語を検索...</string>
+    <string name="btn_exit">終了</string>
+    <string name="confirm_delete_title">単語を削除</string>
+    <string name="confirm_delete_message">本当に "%1$s" を削除しますか？</string>
+    <string name="dont_ask_again">今後表示しない</string>
+
+    <string name="btn_clear_data">データを消去</string>
+    <string name="clear_tool_title">データを消去</string>
+    <string name="clear_tool_message">本当にデータを消去しますか？この操作は元に戻せません。</string>
+    <string name="save_languages">言語を保持</string>
+    <string name="save_sources">ソースを保持</string>
+    <string name="clear_tool_type_langs">確認のため、すべての言語名をカンマ区切りで入力してください:</string>
+
+    <string name="btn_export">エクスポート</string>
+    <string name="btn_import">インポート</string>
+    <string name="btn_export_all">すべてエクスポート</string>
+    <string name="export_all_title">すべての単語をエクスポート</string>
+    <string name="export_all_include_metadata">メタデータを含める (履歴)</string>
+    <string name="export_all_warning">メタデータにより、アプリを再インストールした際に単語の作成日を復元できます。</string>
+
+    <string name="dialog_missing_components_title">不足しているコンポーネント</string>
+    <string name="dialog_missing_components_lang_header">言語: %1$s</string>
+    <string name="dialog_missing_components_src_header">ソース: %1$s</string>
+    <string name="dialog_missing_components_question">作成して単語をインポートしますか？</string>
+    <string name="btn_create_import">作成してインポート</string>
+    <string name="btn_skip">スキップ</string>
+    <string name="dialog_import_destination_title">インポート先を選択</string>
+    <string name="dialog_import_destination_message">インポートした単語の保存先を選択してください:</string>
+    <string name="btn_import_action">インポート</string>
+
+    <string name="btn_settings">設定</string>
+    <string name="settings_menu_title">設定</string>
+    <string name="settings_theme">アプリテーマ</string>
+    <string name="settings_about">このアプリについて</string>
+    <string name="settings_general">一般</string>
+    <string name="general_settings_title">一般設定</string>
+    <string name="app_language">アプリの言語</string>
+    <string name="reset_defaults">デフォルト設定に戻す</string>
+    <string name="reset_defaults_message">すべての設定をデフォルトに戻しますか？(「今後表示しない」の設定も解除されます)</string>
+    <string name="btn_invocation_method">起動方法</string>
+    <string name="dialog_invocation_title">起動方法を選択</string>
+    <string name="method_swipe">上にスワイプ (デフォルト)</string>
+    <string name="method_back_button">戻るボタンを長押し (2秒)</string>
+    <string name="method_back_button_unavailable">戻るボタンを長押し (利用不可)</string>
+    <string name="method_tile_only">設定タイルのみ</string>
+
+    <string name="theme_monochrome">モノクロ (白黒)</string>
+    <string name="theme_light">ライト</string>
+    <string name="theme_green">グリーン</string>
+    <string name="theme_cyan">シアン</string>
+    <string name="theme_red">レッド</string>
+    <string name="theme_purple">パープル</string>
+
+    <string name="about_title">AnEnについて</string>
+    <string name="about_version">バージョン 1.1.0</string>
+    <string name="about_description">単語を素早く保存するための強力なツール</string>
+    <string name="about_license">ライセンス</string>
+    <string name="about_license_text">このアプリケーションはMITライセンスの下でライセンスされています。</string>
+
+    <string name="btn_close">閉じる</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_yes">はい</string>
+    <string name="btn_cancel">キャンセル</string>
+    <string name="dialog_warning_title">警告！</string>
+    <string name="delete_source_warning_message">このソースには %1$d 個の単語が含まれています。削除すると、すべての単語が完全に削除されます。\n\n確認のため \'%2$s\' と入力してください。</string>
+    <string name="delete_language_warning_message">この言語には %1$d 個の単語が含まれています。削除すると、すべてのソースと単語が完全に削除されます。\n\n確認のため \'%2$s\' と入力してください。</string>
+
+    <string name="toast_no_apps_found">適切なアプリが見つかりません</string>
+    <string name="toast_need_permissions">最初にすべての許可を与えてください</string>
+    <string name="toast_add_language">少なくとも1つの言語を追加してください</string>
+    <string name="toast_export_empty">保存する未エクスポートの単語はありません</string>
+    <string name="toast_export_success">単語が正常にエクスポートされました</string>
+    <string name="toast_import_success">単語が正常にインポートされました</string>
+    <string name="toast_io_error">ファイルの処理中にエラーが発生しました</string>
+    <string name="toast_no_words_to_clear">データを消去するには少なくとも1つの単語が必要です</string>
+    <string name="toast_file_empty">ファイルが空です</string>
+    <string name="toast_no_valid_header">ファイルヘッダーに有効な単語がありません</string>
+    <string name="toast_no_valid_words">有効な単語が見つかりません</string>
+    <string name="toast_imported_words">%1$d 個の単語をインポートしました</string>
+    <string name="toast_imported_history">%1$d 個の単語を履歴付きでインポートしました</string>
+    <string name="toast_selected_only_source">利用可能な唯一のソースを選択しました</string>
+    <string name="toast_method_unavailable">この方法はお使いのAndroidバージョンではサポートされていません。スワイプまたはタイルを使用してください。</string>
+    <string name="toast_tile_not_target">単語を追加するには、まずターゲットアプリを開いてください。</string>
+    <string name="search_apps_hint">アプリを検索...</string>
+    <string name="dialog_select_app_title">ターゲットアプリを選択</string>
+</resources>

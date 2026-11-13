@@ -1,110 +1,79 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">AnEn</string>
 
-    <!-- Main Screen -->
+    <!-- ========================================== -->
+    <!-- MAIN SCREEN                                -->
+    <!-- ========================================== -->
     <string name="service_toggle_label">Включить / Выключить сервис</string>
     <string name="btn_grant_overlay">Разрешить наложение поверх окон</string>
     <string name="btn_grant_accessibility">Включить службу доступности</string>
+    <string name="overlay_granted">Разрешение на оверлей получено ✓</string>
+    <string name="accessibility_granted">Служба доступности включена ✓</string>
     <string name="btn_select_app">Выбрать целевое приложение</string>
     <string name="btn_select_app_selected">Цель: %1$s</string>
     <string name="btn_select_app_multiple">Цели: %1$d прил.</string>
 
-    <!-- Database Actions -->
-    <string name="btn_db_normal">База данных (Обычный вид)</string>
-    <string name="btn_db_raw">База данных (Raw формат)</string>
-    <string name="btn_export">Экспортировать</string>
-    <string name="btn_import">Импортировать</string>
-    <string name="btn_export_all">Экспортировать всё</string>
-    <string name="btn_clear">Очистка</string>
-
-    <!-- Dialogs and Toasts -->
-    <string name="dialog_select_app_title">Выберите целевое приложение</string>
-    <string name="toast_no_apps_found">Подходящих приложений не найдено</string>
-    <string name="toast_need_permissions">Пожалуйста, сначала предоставьте все разрешения</string>
-    <string name="toast_add_language">Добавьте хотя бы один язык</string>
-
-    <!-- Accessibility Service -->
+    <!-- ========================================== -->
+    <!-- ACCESSIBILITY SERVICE & TILE               -->
+    <!-- ========================================== -->
     <string name="accessibility_service_label">Служба наложения AnEn</string>
     <string name="accessibility_service_description">Эта служба определяет активное приложение для отображения окна сохранения слов.</string>
+    <string name="tile_label">Добавить слово</string>
+    <string name="tile_description">Добавить новое слово в AnEn</string>
 
-    <!-- Permission Status -->
-    <string name="overlay_granted">Разрешение на оверлей получено ✓</string>
-    <string name="accessibility_granted">Служба доступности включена ✓</string>
-
-    <!-- Overlay Input Window -->
+    <!-- ========================================== -->
+    <!-- OVERLAY INPUT                              -->
+    <!-- ========================================== -->
     <string name="input_hint">Введите слово...</string>
     <string name="btn_save">Сохранить</string>
 
-    <!-- Database View Dialogs -->
+    <!-- ========================================== -->
+    <!-- DATABASE & DELIMITERS                      -->
+    <!-- ========================================== -->
+    <string name="btn_db_normal">База данных (Обычный вид)</string>
+    <string name="btn_db_raw">База данных (Raw формат)</string>
     <string name="dialog_db_title">База данных (Обычный вид)</string>
     <string name="dialog_db_raw_title">База данных (Raw формат)</string>
     <string name="dialog_db_empty">База данных пуста</string>
-
-    <!-- Export/Import Toasts -->
-    <string name="toast_export_empty">Нет неэкспортированных слов для сохранения</string>
-    <string name="toast_export_success">Слова успешно экспортированы</string>
-    <string name="toast_import_success">Слова успешно импортированы</string>
-    <string name="toast_io_error">Произошла ошибка при работе с файлом</string>
-
-    <!-- Dialog Buttons -->
-    <string name="btn_close">Закрыть</string>
-    <string name="btn_ok">ОК</string>
-    <string name="btn_yes">Да</string>
-    <string name="btn_cancel">Отмена</string>
-
-    <!-- Settings -->
-    <string name="btn_settings">Настройки</string>
-    <string name="settings_menu_title">Настройки</string>
-    <string name="settings_theme">Тема приложения</string>
-    <string name="settings_about">О приложении</string>
-    <string name="settings_general">Основные</string>
-    <string name="general_settings_title">Основные настройки</string>
-    <string name="app_language">Язык приложения</string>
-    <string name="reset_defaults">Сбросить настройки по умолчанию</string>
-    <string name="reset_defaults_message">Вы уверены, что хотите сбросить все настройки? (Это отключит все предупреждения "больше не спрашивать").</string>
-
-    <!-- Themes -->
-    <string name="theme_monochrome">Монохромная (Ч/Б)</string>
-    <string name="theme_light">Светлая</string>
-    <string name="theme_green">Зеленая</string>
-    <string name="theme_cyan">Циановая</string>
-    <string name="theme_red">Красная</string>
-    <string name="theme_purple">Фиолетовая</string>
-
-    <!-- About Dialog -->
-    <string name="about_title">О приложении AnEn</string>
-    <string name="about_version">Версия 1.1.0</string>
-    <string name="about_description">Удобный инструмент для быстрого сохранения слов</string>
-    <string name="about_license">Лицензия</string>
-    <string name="about_license_text">Это приложение распространяется под лицензией MIT.</string>
-
-    <!-- Invocation Methods -->
-    <string name="btn_invocation_method">Метод вызова</string>
-    <string name="dialog_invocation_title">Выберите метод вызова</string>
-    <string name="method_swipe">Свайп вверх (По умолчанию)</string>
-    <string name="method_back_button">Удержание кнопки Назад (2 сек)</string>
-    <string name="method_back_button_unavailable">Удержание кнопки Назад (Недоступно)</string>
-    <string name="toast_method_unavailable">Этот метод не поддерживается на вашей версии Android. Используйте свайп или плитку.</string>
-    <string name="method_tile_only">Только плитка настроек</string>
-    <string name="tile_label">Добавить слово</string>
-    <string name="tile_description">Добавить новое слово в AnEn</string>
-    <string name="toast_tile_not_target">Сначала откройте целевое приложение, чтобы добавить слово.</string>
-
-    <!-- Delimiters -->
+    <string name="delimiter_label">Разделитель</string>
     <string name="delimiter_tab">Табуляция</string>
     <string name="delimiter_pipe">Вертикальная черта (|)</string>
     <string name="delimiter_semicolon">Точка с запятой (;)</string>
     <string name="delimiter_colon">Двоеточие (:)</string>
     <string name="delimiter_comma">Запятая (,)</string>
     <string name="delimiter_space">Пробел</string>
-    <string name="delimiter_label">Разделитель</string>
 
-    <!-- Export All Dialog -->
-    <string name="export_all_title">Экспорт всех слов</string>
-    <string name="export_all_include_metadata">Включить метаданные (История)</string>
-    <string name="export_all_warning">Метаданные позволяют восстановить даты добавления слов при переустановке приложения.</string>
+    <!-- Filters -->
+    <string name="filter_languages">Фильтр языков</string>
+    <string name="filter_sources">Фильтр источников</string>
+    <string name="option_all">Все</string>
+    <string name="btn_languages_all">Языки (Все)</string>
+    <string name="btn_sources_all">Источники (Все)</string>
+    <string name="btn_languages_count">Языки (%1$d)</string>
+    <string name="btn_sources_count">Источники (%1$d)</string>
+    <string name="btn_sources_none">Источники (Нет)</string>
 
-    <!-- Word Manager -->
+    <!-- ========================================== -->
+    <!-- LANGUAGES & SOURCES                        -->
+    <!-- ========================================== -->
+    <string name="working_languages_title">Рабочие языки</string>
+    <string name="working_sources_title">Рабочие источники</string>
+    <string name="language_name_hint">Название языка</string>
+    <string name="source_name_hint">Название источника</string>
+    <string name="abbreviation_hint">Сокращение (необязательно, до 3 символов)</string>
+    <string name="add_source_to_lang">Добавить источник для %1$s</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_select_lang_title">Выбрать язык по умолчанию</string>
+    <string name="dialog_select_src_title">Выбрать источник по умолчанию</string>
+    <string name="editing_lang_names">Редактирование названий языков</string>
+    <string name="editing_src_names">Редактирование названий источников</string>
+    <string name="editing_abbrev">Редактирование сокращений</string>
+
+    <!-- ========================================== -->
+    <!-- WORD MANAGER (CLEAR)                       -->
+    <!-- ========================================== -->
+    <string name="btn_clear">Очистка</string>
     <string name="word_manager_title">Управление словами</string>
     <string name="search_words_hint">Поиск слов...</string>
     <string name="btn_exit">Выйти</string>
@@ -119,52 +88,93 @@
     <string name="save_languages">Сохранить языки</string>
     <string name="save_sources">Сохранить источники</string>
     <string name="clear_tool_type_langs">Введите через запятую названия ВСЕХ ваших языков для подтверждения:</string>
-    <string name="toast_no_words_to_clear">У вас должно быть хотя бы 1 слово для очистки</string>
 
-    <!-- Missing Translations -->
-    <string name="dialog_select_lang_title">Выбрать язык по умолчанию</string>
-    <string name="dialog_select_src_title">Выбрать источник по умолчанию</string>
-    <string name="filter_languages">Фильтр языков</string>
-    <string name="filter_sources">Фильтр источников</string>
-    <string name="option_all">Все</string>
-    <string name="btn_languages_all">Языки (Все)</string>
-    <string name="btn_sources_all">Источники (Все)</string>
-    <string name="btn_languages_count">Языки (%1$d)</string>
-    <string name="btn_sources_count">Источники (%1$d)</string>
-    <string name="btn_sources_none">Источники (Нет)</string>
-    <string name="search_apps_hint">Поиск приложений...</string>
-    <string name="working_languages_title">Рабочие языки</string>
-    <string name="working_sources_title">Рабочие источники</string>
-    <string name="language_name_hint">Название языка</string>
-    <string name="source_name_hint">Название источника</string>
-    <string name="editing_lang_names">Редактирование названий языков</string>
-    <string name="editing_src_names">Редактирование названий источников</string>
-    <string name="editing_abbrev">Редактирование сокращений</string>
+    <!-- ========================================== -->
+    <!-- EXPORT / IMPORT                            -->
+    <!-- ========================================== -->
+    <string name="btn_export">Экспортировать</string>
+    <string name="btn_import">Импортировать</string>
+    <string name="btn_export_all">Экспортировать всё</string>
+    <string name="export_all_title">Экспорт всех слов</string>
+    <string name="export_all_include_metadata">Включить метаданные (История)</string>
+    <string name="export_all_warning">Метаданные позволяют восстановить даты добавления слов при переустановке приложения.</string>
 
-    <!-- Import / Metadata Toasts -->
-    <string name="toast_file_empty">Файл пуст</string>
-    <string name="toast_no_valid_header">В заголовке файла нет действительных слов</string>
-    <string name="toast_no_valid_words">Действительные слова не найдены</string>
-    <string name="toast_imported_words">Импортировано %1$d слов</string>
-    <string name="toast_imported_history">Импортировано %1$d слов с историей</string>
-    <string name="toast_selected_only_source">Выбран единственный доступный источник</string>
-
-    <!-- Missing Components Dialog -->
+    <!-- Import Dialogs -->
     <string name="dialog_missing_components_title">Отсутствующие компоненты</string>
     <string name="dialog_missing_components_lang_header">Языки: %1$s</string>
     <string name="dialog_missing_components_src_header">Источники: %1$s</string>
     <string name="dialog_missing_components_question">Хотите создать их и импортировать слова?</string>
     <string name="btn_create_import">Создать и импортировать</string>
     <string name="btn_skip">Пропустить</string>
-
-    <!-- Import Destination Dialog -->
     <string name="dialog_import_destination_title">Выберите место для импорта</string>
     <string name="dialog_import_destination_message">Выберите, куда поместить импортируемые слова:</string>
     <string name="btn_import_action">Импортировать</string>
 
-    <string name="add_source_to_lang">Добавить источник для %1$s</string>
+    <!-- ========================================== -->
+    <!-- SETTINGS                                   -->
+    <!-- ========================================== -->
+    <string name="btn_settings">Настройки</string>
+    <string name="settings_menu_title">Настройки</string>
+    <string name="settings_theme">Тема приложения</string>
+    <string name="settings_about">О приложении</string>
+    <string name="settings_general">Основные</string>
+    <string name="general_settings_title">Основные настройки</string>
+    <string name="app_language">Язык приложения</string>
+    <string name="reset_defaults">Сбросить настройки по умолчанию</string>
+    <string name="reset_defaults_message">Вы уверены, что хотите сбросить все настройки? (Это отключит все предупреждения "больше не спрашивать").</string>
+    <string name="btn_invocation_method">Метод вызова</string>
+    <string name="dialog_invocation_title">Выберите метод вызова</string>
+    <string name="method_swipe">Свайп вверх (По умолчанию)</string>
+    <string name="method_back_button">Удержание кнопки Назад (2 сек)</string>
+    <string name="method_back_button_unavailable">Удержание кнопки Назад (Недоступно)</string>
+    <string name="method_tile_only">Только плитка настроек</string>
+
+    <!-- ========================================== -->
+    <!-- THEMES & ABOUT                             -->
+    <!-- ========================================== -->
+    <string name="theme_monochrome">Монохромная (Ч/Б)</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_green">Зеленая</string>
+    <string name="theme_cyan">Циановая</string>
+    <string name="theme_red">Красная</string>
+    <string name="theme_purple">Фиолетовая</string>
+
+    <string name="about_title">О приложении AnEn</string>
+    <string name="about_version">Версия 1.1.0</string>
+    <string name="about_description">Удобный инструмент для быстрого сохранения слов</string>
+    <string name="about_license">Лицензия</string>
+    <string name="about_license_text">Это приложение распространяется под лицензией MIT.</string>
+
+    <!-- ========================================== -->
+    <!-- GLOBAL DIALOGS & BUTTONS                   -->
+    <!-- ========================================== -->
+    <string name="btn_close">Закрыть</string>
+    <string name="btn_ok">ОК</string>
+    <string name="btn_yes">Да</string>
+    <string name="btn_cancel">Отмена</string>
     <string name="dialog_warning_title">Внимание!</string>
     <string name="delete_source_warning_message">Этот источник содержит %1$d слов. Удаление навсегда удалит их.\n\nВведите \'%2$s\' для подтверждения.</string>
     <string name="delete_language_warning_message">Этот язык содержит %1$d слов. Удаление навсегда удалит все его источники и слова.\n\nВведите \'%2$s\' для подтверждения.</string>
-    <string name="abbreviation_hint">Сокращение (необязательно, до 3 символов)</string>
+
+    <!-- ========================================== -->
+    <!-- TOASTS                                     -->
+    <!-- ========================================== -->
+    <string name="toast_no_apps_found">Подходящих приложений не найдено</string>
+    <string name="toast_need_permissions">Пожалуйста, сначала предоставьте все разрешения</string>
+    <string name="toast_add_language">Добавьте хотя бы один язык</string>
+    <string name="toast_export_empty">Нет неэкспортированных слов для сохранения</string>
+    <string name="toast_export_success">Слова успешно экспортированы</string>
+    <string name="toast_import_success">Слова успешно импортированы</string>
+    <string name="toast_io_error">Произошла ошибка при работе с файлом</string>
+    <string name="toast_no_words_to_clear">У вас должно быть хотя бы 1 слово для очистки</string>
+    <string name="toast_file_empty">Файл пуст</string>
+    <string name="toast_no_valid_header">В заголовке файла нет действительных слов</string>
+    <string name="toast_no_valid_words">Действительные слова не найдены</string>
+    <string name="toast_imported_words">Импортировано %1$d слов</string>
+    <string name="toast_imported_history">Импортировано %1$d слов с историей</string>
+    <string name="toast_selected_only_source">Выбран единственный доступный источник</string>
+    <string name="toast_method_unavailable">Этот метод не поддерживается на вашей версии Android. Используйте свайп или плитку.</string>
+    <string name="toast_tile_not_target">Сначала откройте целевое приложение, чтобы добавить слово.</string>
+    <string name="search_apps_hint">Поиск приложений...</string>
+    <string name="dialog_select_app_title">Выберите целевое приложение</string>
 </resources>

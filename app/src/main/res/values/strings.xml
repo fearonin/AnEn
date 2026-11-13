@@ -1,110 +1,79 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">AnEn</string>
 
-    <!-- Main Screen -->
+    <!-- ========================================== -->
+    <!-- MAIN SCREEN                                -->
+    <!-- ========================================== -->
     <string name="service_toggle_label">Enable / Disable Service</string>
     <string name="btn_grant_overlay">Grant Overlay Permission</string>
     <string name="btn_grant_accessibility">Enable Accessibility Service</string>
+    <string name="overlay_granted">Overlay Permission Granted ✓</string>
+    <string name="accessibility_granted">Accessibility Service Enabled ✓</string>
     <string name="btn_select_app">Select Target App</string>
     <string name="btn_select_app_selected">Target: %1$s</string>
     <string name="btn_select_app_multiple" tools:ignore="PluralsCandidate">Target: %1$d apps</string>
 
-    <!-- Database Actions -->
-    <string name="btn_db_normal">Database (Normal View)</string>
-    <string name="btn_db_raw">Database (Raw Format)</string>
-    <string name="btn_export">Export</string>
-    <string name="btn_import">Import</string>
-    <string name="btn_export_all">Export All</string>
-    <string name="btn_clear">Clear</string>
-
-    <!-- Dialogs and Toasts -->
-    <string name="dialog_select_app_title">Select target application</string>
-    <string name="toast_no_apps_found">No suitable apps found</string>
-    <string name="toast_need_permissions">Please grant all permissions first</string>
-    <string name="toast_add_language">Add at least one language</string>
-
-    <!-- Accessibility Service -->
+    <!-- ========================================== -->
+    <!-- ACCESSIBILITY SERVICE & TILE               -->
+    <!-- ========================================== -->
     <string name="accessibility_service_label">AnEn Overlay Service</string>
     <string name="accessibility_service_description">This service detects the active app to display the word-saving overlay.</string>
+    <string name="tile_label">Add word</string>
+    <string name="tile_description">Add a new word to AnEn</string>
 
-    <!-- Permission Status -->
-    <string name="overlay_granted">Overlay Permission Granted ✓</string>
-    <string name="accessibility_granted">Accessibility Service Enabled ✓</string>
-
-    <!-- Overlay Input Window -->
+    <!-- ========================================== -->
+    <!-- OVERLAY INPUT                              -->
+    <!-- ========================================== -->
     <string name="input_hint">Enter word...</string>
     <string name="btn_save">Save</string>
 
-    <!-- Database View Dialogs -->
+    <!-- ========================================== -->
+    <!-- DATABASE & DELIMITERS                      -->
+    <!-- ========================================== -->
+    <string name="btn_db_normal">Database (Normal View)</string>
+    <string name="btn_db_raw">Database (Raw Format)</string>
     <string name="dialog_db_title">Database (Normal View)</string>
     <string name="dialog_db_raw_title">Database (Raw Format)</string>
     <string name="dialog_db_empty">Database is empty</string>
-
-    <!-- Export/Import Toasts -->
-    <string name="toast_export_empty">No unexported words to save</string>
-    <string name="toast_export_success">Words exported successfully</string>
-    <string name="toast_import_success">Words imported successfully</string>
-    <string name="toast_io_error">An error occurred while handling the file</string>
-
-    <!-- Dialog Buttons -->
-    <string name="btn_close">Close</string>
-    <string name="btn_ok">OK</string>
-    <string name="btn_yes">Yes</string>
-    <string name="btn_cancel">Cancel</string>
-
-    <!-- Settings -->
-    <string name="btn_settings">Settings</string>
-    <string name="settings_menu_title">Settings</string>
-    <string name="settings_theme">App Theme</string>
-    <string name="settings_about">About</string>
-    <string name="settings_general">General</string>
-    <string name="general_settings_title">General Settings</string>
-    <string name="app_language">App Language</string>
-    <string name="reset_defaults">Reset Default Settings</string>
-    <string name="reset_defaults_message">Are you sure you want to reset all settings to default? (This includes disabling \"don\'t ask again\" prompts).</string>
-
-    <!-- Themes -->
-    <string name="theme_monochrome">Monochrome (B/W)</string>
-    <string name="theme_light">Light</string>
-    <string name="theme_green">Green</string>
-    <string name="theme_cyan">Cyan</string>
-    <string name="theme_red">Red</string>
-    <string name="theme_purple">Purple</string>
-
-    <!-- About Dialog -->
-    <string name="about_title">About AnEn</string>
-    <string name="about_version">Version 1.1.0</string>
-    <string name="about_description">A powerful tool for quick word saving</string>
-    <string name="about_license">License</string>
-    <string name="about_license_text">This application is licensed under the MIT License.</string>
-
-    <!-- Invocation Methods -->
-    <string name="btn_invocation_method">Invocation Method</string>
-    <string name="dialog_invocation_title">Select Invocation Method</string>
-    <string name="method_swipe">Swipe Up (Default)</string>
-    <string name="method_back_button">Hold Back Button (2s)</string>
-    <string name="method_back_button_unavailable">Hold Back Button (Unavailable)</string>
-    <string name="toast_method_unavailable">This method is not supported on your Android version. Please use Swipe or Quick Tile.</string>
-    <string name="method_tile_only">Only Settings Tile</string>
-    <string name="tile_label">Add word</string>
-    <string name="tile_description">Add a new word to AnEn</string>
-    <string name="toast_tile_not_target">Open a target app first to add a word.</string>
-
-    <!-- Delimiters -->
+    <string name="delimiter_label">Delimiter</string>
     <string name="delimiter_tab">Tab</string>
     <string name="delimiter_pipe">Pipe (|)</string>
     <string name="delimiter_semicolon">Semicolon (;)</string>
     <string name="delimiter_colon">Colon (:)</string>
     <string name="delimiter_comma">Comma (,)</string>
     <string name="delimiter_space">Space</string>
-    <string name="delimiter_label">Delimiter</string>
 
-    <!-- Export All Dialog -->
-    <string name="export_all_title">Export All Words</string>
-    <string name="export_all_include_metadata">Include Metadata (Word History)</string>
-    <string name="export_all_warning">Metadata allows restoring word creation dates if you reinstall the app.</string>
+    <!-- Filters -->
+    <string name="filter_languages">Filter Languages</string>
+    <string name="filter_sources">Filter Sources</string>
+    <string name="option_all">All</string>
+    <string name="btn_languages_all">Languages (All)</string>
+    <string name="btn_sources_all">Sources (All)</string>
+    <string name="btn_languages_count">Languages (%1$d)</string>
+    <string name="btn_sources_count">Sources (%1$d)</string>
+    <string name="btn_sources_none">Sources (None)</string>
 
-    <!-- Word Manager -->
+    <!-- ========================================== -->
+    <!-- LANGUAGES & SOURCES                        -->
+    <!-- ========================================== -->
+    <string name="working_languages_title">Working Languages</string>
+    <string name="working_sources_title">Working Sources</string>
+    <string name="language_name_hint">Language name</string>
+    <string name="source_name_hint">Source name</string>
+    <string name="abbreviation_hint">Abbreviation (optional, max 3)</string>
+    <string name="add_source_to_lang">Add Source to %1$s</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_select_lang_title">Select Default Language</string>
+    <string name="dialog_select_src_title">Select Default Source</string>
+    <string name="editing_lang_names">Editing Language Names</string>
+    <string name="editing_src_names">Editing Source Names</string>
+    <string name="editing_abbrev">Editing Abbreviations</string>
+
+    <!-- ========================================== -->
+    <!-- WORD MANAGER (CLEAR)                       -->
+    <!-- ========================================== -->
+    <string name="btn_clear">Clear</string>
     <string name="word_manager_title">Manage Words</string>
     <string name="search_words_hint">Search words...</string>
     <string name="btn_exit">Exit</string>
@@ -119,52 +88,93 @@
     <string name="save_languages">Save Languages</string>
     <string name="save_sources">Save Sources</string>
     <string name="clear_tool_type_langs">Type the names of ALL your languages separated by commas to confirm:</string>
-    <string name="toast_no_words_to_clear">You must have at least 1 word to clear data</string>
 
-    <!-- Missing Translations -->
-    <string name="dialog_select_lang_title">Select Default Language</string>
-    <string name="dialog_select_src_title">Select Default Source</string>
-    <string name="filter_languages">Filter Languages</string>
-    <string name="filter_sources">Filter Sources</string>
-    <string name="option_all">All</string>
-    <string name="btn_languages_all">Languages (All)</string>
-    <string name="btn_sources_all">Sources (All)</string>
-    <string name="btn_languages_count">Languages (%1$d)</string>
-    <string name="btn_sources_count">Sources (%1$d)</string>
-    <string name="btn_sources_none">Sources (None)</string>
-    <string name="search_apps_hint">Search apps...</string>
-    <string name="working_languages_title">Working Languages</string>
-    <string name="working_sources_title">Working Sources</string>
-    <string name="language_name_hint">Language name</string>
-    <string name="source_name_hint">Source name</string>
-    <string name="editing_lang_names">Editing Language Names</string>
-    <string name="editing_src_names">Editing Source Names</string>
-    <string name="editing_abbrev">Editing Abbreviations</string>
+    <!-- ========================================== -->
+    <!-- EXPORT / IMPORT                            -->
+    <!-- ========================================== -->
+    <string name="btn_export">Export</string>
+    <string name="btn_import">Import</string>
+    <string name="btn_export_all">Export All</string>
+    <string name="export_all_title">Export All Words</string>
+    <string name="export_all_include_metadata">Include Metadata (Word History)</string>
+    <string name="export_all_warning">Metadata allows restoring word creation dates if you reinstall the app.</string>
 
-    <!-- Import / Metadata Toasts -->
-    <string name="toast_file_empty">File is empty</string>
-    <string name="toast_no_valid_header">No valid words in the file header</string>
-    <string name="toast_no_valid_words">No valid words found</string>
-    <string name="toast_imported_words">Imported %1$d words</string>
-    <string name="toast_imported_history">Imported %1$d words with history</string>
-    <string name="toast_selected_only_source">Selected only available source</string>
-
-    <!-- Missing Components Dialog -->
+    <!-- Import Dialogs -->
     <string name="dialog_missing_components_title">Missing Components</string>
     <string name="dialog_missing_components_lang_header">Languages: %1$s</string>
     <string name="dialog_missing_components_src_header">Sources: %1$s</string>
     <string name="dialog_missing_components_question">Do you want to create them and import the words?</string>
     <string name="btn_create_import">Create &amp; Import</string>
     <string name="btn_skip">Skip</string>
-
-    <!-- Import Destination Dialog -->
     <string name="dialog_import_destination_title">Select Import Destination</string>
     <string name="dialog_import_destination_message">Choose where to put the imported words:</string>
     <string name="btn_import_action">Import</string>
 
-    <string name="add_source_to_lang">Add Source to %1$s</string>
+    <!-- ========================================== -->
+    <!-- SETTINGS                                   -->
+    <!-- ========================================== -->
+    <string name="btn_settings">Settings</string>
+    <string name="settings_menu_title">Settings</string>
+    <string name="settings_theme">App Theme</string>
+    <string name="settings_about">About</string>
+    <string name="settings_general">General</string>
+    <string name="general_settings_title">General Settings</string>
+    <string name="app_language">App Language</string>
+    <string name="reset_defaults">Reset Default Settings</string>
+    <string name="reset_defaults_message">Are you sure you want to reset all settings to default? (This includes disabling \"don\'t ask again\" prompts).</string>
+    <string name="btn_invocation_method">Invocation Method</string>
+    <string name="dialog_invocation_title">Select Invocation Method</string>
+    <string name="method_swipe">Swipe Up (Default)</string>
+    <string name="method_back_button">Hold Back Button (2s)</string>
+    <string name="method_back_button_unavailable">Hold Back Button (Unavailable)</string>
+    <string name="method_tile_only">Only Settings Tile</string>
+
+    <!-- ========================================== -->
+    <!-- THEMES & ABOUT                             -->
+    <!-- ========================================== -->
+    <string name="theme_monochrome">Monochrome (B/W)</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_green">Green</string>
+    <string name="theme_cyan">Cyan</string>
+    <string name="theme_red">Red</string>
+    <string name="theme_purple">Purple</string>
+
+    <string name="about_title">About AnEn</string>
+    <string name="about_version">Version 1.1.0</string>
+    <string name="about_description">A powerful tool for quick word saving</string>
+    <string name="about_license">License</string>
+    <string name="about_license_text">This application is licensed under the MIT License.</string>
+
+    <!-- ========================================== -->
+    <!-- GLOBAL DIALOGS & BUTTONS                   -->
+    <!-- ========================================== -->
+    <string name="btn_close">Close</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_cancel">Cancel</string>
     <string name="dialog_warning_title">Warning!</string>
     <string name="delete_source_warning_message">This source contains %1$d words. Deleting it will permanently delete all its words.\n\nType \'%2$s\' to confirm.</string>
     <string name="delete_language_warning_message">This language contains %1$d words. Deleting it will permanently delete all its sources and words.\n\nType \'%2$s\' to confirm.</string>
-    <string name="abbreviation_hint">Abbreviation (optional, max 3)</string>
+
+    <!-- ========================================== -->
+    <!-- TOASTS                                     -->
+    <!-- ========================================== -->
+    <string name="toast_no_apps_found">No suitable apps found</string>
+    <string name="toast_need_permissions">Please grant all permissions first</string>
+    <string name="toast_add_language">Add at least one language</string>
+    <string name="toast_export_empty">No unexported words to save</string>
+    <string name="toast_export_success">Words exported successfully</string>
+    <string name="toast_import_success">Words imported successfully</string>
+    <string name="toast_io_error">An error occurred while handling the file</string>
+    <string name="toast_no_words_to_clear">You must have at least 1 word to clear data</string>
+    <string name="toast_file_empty">File is empty</string>
+    <string name="toast_no_valid_header">No valid words in the file header</string>
+    <string name="toast_no_valid_words">No valid words found</string>
+    <string name="toast_imported_words">Imported %1$d words</string>
+    <string name="toast_imported_history">Imported %1$d words with history</string>
+    <string name="toast_selected_only_source">Selected only available source</string>
+    <string name="toast_method_unavailable">This method is not supported on your Android version. Please use Swipe or Quick Tile.</string>
+    <string name="toast_tile_not_target">Open a target app first to add a word.</string>
+    <string name="search_apps_hint">Search apps...</string>
+    <string name="dialog_select_app_title">Select target application</string>
 </resources>

@@ -1,0 +1,180 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">AnEn</string>
+
+    <!-- ========================================== -->
+    <!-- MAIN SCREEN                                -->
+    <!-- ========================================== -->
+    <string name="service_toggle_label">서비스 활성화 / 비활성화</string>
+    <string name="btn_grant_overlay">오버레이 권한 부여</string>
+    <string name="btn_grant_accessibility">접근성 서비스 활성화</string>
+    <string name="overlay_granted">오버레이 권한 부여됨 ✓</string>
+    <string name="accessibility_granted">접근성 서비스 활성화됨 ✓</string>
+    <string name="btn_select_app">대상 앱 선택</string>
+    <string name="btn_select_app_selected">대상: %1$s</string>
+    <string name="btn_select_app_multiple" tools:ignore="PluralsCandidate">대상: %1$d개 앱</string>
+
+    <!-- ========================================== -->
+    <!-- ACCESSIBILITY SERVICE & TILE               -->
+    <!-- ========================================== -->
+    <string name="accessibility_service_label">AnEn 오버레이 서비스</string>
+    <string name="accessibility_service_description">이 서비스는 활성 앱을 감지하여 단어 저장 오버레이를 표시합니다.</string>
+    <string name="tile_label">단어 추가</string>
+    <string name="tile_description">AnEn에 새 단어 추가</string>
+
+    <!-- ========================================== -->
+    <!-- OVERLAY INPUT                              -->
+    <!-- ========================================== -->
+    <string name="input_hint">단어 입력...</string>
+    <string name="btn_save">저장</string>
+
+    <!-- ========================================== -->
+    <!-- DATABASE & DELIMITERS                      -->
+    <!-- ========================================== -->
+    <string name="btn_db_normal">데이터베이스 (일반 보기)</string>
+    <string name="btn_db_raw">데이터베이스 (원본 형식)</string>
+    <string name="dialog_db_title">데이터베이스 (일반 보기)</string>
+    <string name="dialog_db_raw_title">데이터베이스 (원본 형식)</string>
+    <string name="dialog_db_empty">데이터베이스가 비어 있습니다</string>
+    <string name="delimiter_label">구분 기호</string>
+    <string name="delimiter_tab">탭</string>
+    <string name="delimiter_pipe">파이프 (|)</string>
+    <string name="delimiter_semicolon">세미콜론 (;)</string>
+    <string name="delimiter_colon">콜론 (:)</string>
+    <string name="delimiter_comma">쉼표 (,)</string>
+    <string name="delimiter_space">공백</string>
+
+    <!-- Filters -->
+    <string name="filter_languages">언어 필터</string>
+    <string name="filter_sources">출처 필터</string>
+    <string name="option_all">모두</string>
+    <string name="btn_languages_all">언어 (모두)</string>
+    <string name="btn_sources_all">출처 (모두)</string>
+    <string name="btn_languages_count">언어 (%1$d)</string>
+    <string name="btn_sources_count">출처 (%1$d)</string>
+    <string name="btn_sources_none">출처 (없음)</string>
+
+    <!-- ========================================== -->
+    <!-- LANGUAGES & SOURCES                        -->
+    <!-- ========================================== -->
+    <string name="working_languages_title">작업 언어</string>
+    <string name="working_sources_title">작업 출처</string>
+    <string name="language_name_hint">언어 이름</string>
+    <string name="source_name_hint">출처 이름</string>
+    <string name="abbreviation_hint">약어 (선택 사항, 최대 3자)</string>
+    <string name="add_source_to_lang">%1$s에 출처 추가</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_select_lang_title">기본 언어 선택</string>
+    <string name="dialog_select_src_title">기본 출처 선택</string>
+    <string name="editing_lang_names">언어 이름 편집 중</string>
+    <string name="editing_src_names">출처 이름 편집 중</string>
+    <string name="editing_abbrev">약어 편집 중</string>
+
+    <!-- ========================================== -->
+    <!-- WORD MANAGER (CLEAR)                       -->
+    <!-- ========================================== -->
+    <string name="btn_clear">지우기</string>
+    <string name="word_manager_title">단어 관리</string>
+    <string name="search_words_hint">단어 검색...</string>
+    <string name="btn_exit">종료</string>
+    <string name="confirm_delete_title">단어 삭제</string>
+    <string name="confirm_delete_message">"%1$s"을(를) 삭제하시겠습니까?</string>
+    <string name="dont_ask_again">다시 묻지 않음</string>
+
+    <!-- Clear Data -->
+    <string name="btn_clear_data">데이터 지우기</string>
+    <string name="clear_tool_title">데이터 지우기</string>
+    <string name="clear_tool_message">데이터를 지우시겠습니까? 이 작업은 취소할 수 없습니다.</string>
+    <string name="save_languages">언어 저장</string>
+    <string name="save_sources">출처 저장</string>
+    <string name="clear_tool_type_langs">확인을 위해 모든 언어 이름을 쉼표로 구분하여 입력하세요:</string>
+
+    <!-- ========================================== -->
+    <!-- EXPORT / IMPORT                            -->
+    <!-- ========================================== -->
+    <string name="btn_export">내보내기</string>
+    <string name="btn_import">가져오기</string>
+    <string name="btn_export_all">모두 내보내기</string>
+    <string name="export_all_title">모든 단어 내보내기</string>
+    <string name="export_all_include_metadata">메타데이터 포함 (기록)</string>
+    <string name="export_all_warning">메타데이터를 사용하면 앱을 다시 설치할 때 단어 생성 날짜를 복원할 수 있습니다.</string>
+
+    <!-- Import Dialogs -->
+    <string name="dialog_missing_components_title">누락된 구성 요소</string>
+    <string name="dialog_missing_components_lang_header">언어: %1$s</string>
+    <string name="dialog_missing_components_src_header">출처: %1$s</string>
+    <string name="dialog_missing_components_question">생성하고 단어를 가져오시겠습니까?</string>
+    <string name="btn_create_import">생성 및 가져오기</string>
+    <string name="btn_skip">건너뛰기</string>
+    <string name="dialog_import_destination_title">가져오기 대상 선택</string>
+    <string name="dialog_import_destination_message">가져온 단어를 저장할 위치 선택:</string>
+    <string name="btn_import_action">가져오기</string>
+
+    <!-- ========================================== -->
+    <!-- SETTINGS                                   -->
+    <!-- ========================================== -->
+    <string name="btn_settings">설정</string>
+    <string name="settings_menu_title">설정</string>
+    <string name="settings_theme">앱 테마</string>
+    <string name="settings_about">정보</string>
+    <string name="settings_general">일반</string>
+    <string name="general_settings_title">일반 설정</string>
+    <string name="app_language">앱 언어</string>
+    <string name="reset_defaults">기본 설정으로 재설정</string>
+    <string name="reset_defaults_message">모든 설정을 기본값으로 재설정하시겠습니까? (\"다시 묻지 않음\" 프롬프트가 비활성화됩니다).</string>
+    <string name="btn_invocation_method">호출 방법</string>
+    <string name="dialog_invocation_title">호출 방법 선택</string>
+    <string name="method_swipe">위로 스와이프 (기본)</string>
+    <string name="method_back_button">뒤로 가기 버튼 길게 누르기 (2초)</string>
+    <string name="method_back_button_unavailable">뒤로 가기 버튼 길게 누르기 (사용할 수 없음)</string>
+    <string name="method_tile_only">설정 타일만</string>
+
+    <!-- ========================================== -->
+    <!-- THEMES & ABOUT                             -->
+    <!-- ========================================== -->
+    <string name="theme_monochrome">흑백 (B/W)</string>
+    <string name="theme_light">라이트</string>
+    <string name="theme_green">그린</string>
+    <string name="theme_cyan">시안</string>
+    <string name="theme_red">레드</string>
+    <string name="theme_purple">퍼플</string>
+
+    <string name="about_title">AnEn 정보</string>
+    <string name="about_version">버전 1.1.0</string>
+    <string name="about_description">빠른 단어 저장을 위한 강력한 도구</string>
+    <string name="about_license">라이선스</string>
+    <string name="about_license_text">이 애플리케이션은 MIT 라이선스에 따라 라이선스가 부여됩니다.</string>
+
+    <!-- ========================================== -->
+    <!-- GLOBAL DIALOGS & BUTTONS                   -->
+    <!-- ========================================== -->
+    <string name="btn_close">닫기</string>
+    <string name="btn_ok">확인</string>
+    <string name="btn_yes">예</string>
+    <string name="btn_cancel">취소</string>
+    <string name="dialog_warning_title">경고!</string>
+    <string name="delete_source_warning_message">이 출처에는 %1$d개의 단어가 포함되어 있습니다. 삭제하면 모든 단어가 영구적으로 삭제됩니다.\n\n확인하려면 \'%2$s\'을(를) 입력하세요.</string>
+    <string name="delete_language_warning_message">이 언어에는 %1$d개의 단어가 포함되어 있습니다. 삭제하면 모든 출처와 단어가 영구적으로 삭제됩니다.\n\n확인하려면 \'%2$s\'을(를) 입력하세요.</string>
+
+    <!-- ========================================== -->
+    <!-- TOASTS                                     -->
+    <!-- ========================================== -->
+    <string name="toast_no_apps_found">적합한 앱을 찾을 수 없습니다</string>
+    <string name="toast_need_permissions">먼저 모든 권한을 부여하세요</string>
+    <string name="toast_add_language">최소 하나의 언어를 추가하세요</string>
+    <string name="toast_export_empty">저장할 내보내지 않은 단어가 없습니다</string>
+    <string name="toast_export_success">단어를 성공적으로 내보냈습니다</string>
+    <string name="toast_import_success">단어를 성공적으로 가져왔습니다</string>
+    <string name="toast_io_error">파일을 처리하는 중 오류가 발생했습니다</string>
+    <string name="toast_no_words_to_clear">데이터를 지우려면 최소 1개의 단어가 있어야 합니다</string>
+    <string name="toast_file_empty">파일이 비어 있습니다</string>
+    <string name="toast_no_valid_header">파일 헤더에 유효한 단어가 없습니다</string>
+    <string name="toast_no_valid_words">유효한 단어를 찾을 수 없습니다</string>
+    <string name="toast_imported_words">%1$d개의 단어를 가져왔습니다</string>
+    <string name="toast_imported_history">기록이 포함된 %1$d개의 단어를 가져왔습니다</string>
+    <string name="toast_selected_only_source">사용 가능한 유일한 출처를 선택했습니다</string>
+    <string name="toast_method_unavailable">이 방법은 Android 버전에서 지원되지 않습니다. 스와이프 또는 타일을 사용하세요.</string>
+    <string name="toast_tile_not_target">단어를 추가하려면 먼저 대상 앱을 여세요.</string>
+    <string name="search_apps_hint">앱 검색...</string>
+    <string name="dialog_select_app_title">대상 앱 선택</string>
+</resources>

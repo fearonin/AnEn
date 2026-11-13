@@ -1,0 +1,143 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">AnEn</string>
+
+    <string name="service_toggle_label">启用 / 禁用服务</string>
+    <string name="btn_grant_overlay">授予悬浮窗权限</string>
+    <string name="btn_grant_accessibility">启用无障碍服务</string>
+    <string name="overlay_granted">已授予悬浮窗权限 ✓</string>
+    <string name="accessibility_granted">无障碍服务已启用 ✓</string>
+    <string name="btn_select_app">选择目标应用</string>
+    <string name="btn_select_app_selected">目标: %1$s</string>
+    <string name="btn_select_app_multiple">目标: %1$d 个应用</string>
+
+    <string name="accessibility_service_label">AnEn 悬浮窗服务</string>
+    <string name="accessibility_service_description">此服务检测当前活动的应用以显示单词保存悬浮窗。</string>
+    <string name="tile_label">添加单词</string>
+    <string name="tile_description">向 AnEn 添加新单词</string>
+
+    <string name="input_hint">输入单词...</string>
+    <string name="btn_save">保存</string>
+
+    <string name="btn_db_normal">数据库 (普通视图)</string>
+    <string name="btn_db_raw">数据库 (原始格式)</string>
+    <string name="dialog_db_title">数据库 (普通视图)</string>
+    <string name="dialog_db_raw_title">数据库 (原始格式)</string>
+    <string name="dialog_db_empty">数据库为空</string>
+    <string name="delimiter_label">分隔符</string>
+    <string name="delimiter_tab">制表符</string>
+    <string name="delimiter_pipe">竖线 (|)</string>
+    <string name="delimiter_semicolon">分号 (;)</string>
+    <string name="delimiter_colon">冒号 (:)</string>
+    <string name="delimiter_comma">逗号 (,)</string>
+    <string name="delimiter_space">空格</string>
+
+    <string name="filter_languages">筛选语言</string>
+    <string name="filter_sources">筛选来源</string>
+    <string name="option_all">全部</string>
+    <string name="btn_languages_all">语言 (全部)</string>
+    <string name="btn_sources_all">来源 (全部)</string>
+    <string name="btn_languages_count">语言 (%1$d)</string>
+    <string name="btn_sources_count">来源 (%1$d)</string>
+    <string name="btn_sources_none">来源 (无)</string>
+
+    <string name="working_languages_title">工作语言</string>
+    <string name="working_sources_title">工作来源</string>
+    <string name="language_name_hint">语言名称</string>
+    <string name="source_name_hint">来源名称</string>
+    <string name="abbreviation_hint">缩写 (可选，最多3个字符)</string>
+    <string name="add_source_to_lang">为 %1$s 添加来源</string>
+
+    <string name="dialog_select_lang_title">选择默认语言</string>
+    <string name="dialog_select_src_title">选择默认来源</string>
+    <string name="editing_lang_names">正在编辑语言名称</string>
+    <string name="editing_src_names">正在编辑来源名称</string>
+    <string name="editing_abbrev">正在编辑缩写</string>
+
+    <string name="btn_clear">清理</string>
+    <string name="word_manager_title">管理单词</string>
+    <string name="search_words_hint">搜索单词...</string>
+    <string name="btn_exit">退出</string>
+    <string name="confirm_delete_title">删除单词</string>
+    <string name="confirm_delete_message">您确定要删除 "%1$s" 吗？</string>
+    <string name="dont_ask_again">不再询问</string>
+
+    <string name="btn_clear_data">清除数据</string>
+    <string name="clear_tool_title">清除数据</string>
+    <string name="clear_tool_message">您确定要清除数据吗？此操作无法撤销。</string>
+    <string name="save_languages">保留语言</string>
+    <string name="save_sources">保留来源</string>
+    <string name="clear_tool_type_langs">输入您所有语言的名称，用逗号分隔以确认:</string>
+
+    <string name="btn_export">导出</string>
+    <string name="btn_import">导入</string>
+    <string name="btn_export_all">导出全部</string>
+    <string name="export_all_title">导出所有单词</string>
+    <string name="export_all_include_metadata">包含元数据 (历史记录)</string>
+    <string name="export_all_warning">如果您重新安装应用，元数据允许恢复单词创建日期。</string>
+
+    <string name="dialog_missing_components_title">缺少组件</string>
+    <string name="dialog_missing_components_lang_header">语言: %1$s</string>
+    <string name="dialog_missing_components_src_header">来源: %1$s</string>
+    <string name="dialog_missing_components_question">您想创建它们并导入单词吗？</string>
+    <string name="btn_create_import">创建并导入</string>
+    <string name="btn_skip">跳过</string>
+    <string name="dialog_import_destination_title">选择导入目标</string>
+    <string name="dialog_import_destination_message">选择将导入的单词放在哪里:</string>
+    <string name="btn_import_action">导入</string>
+
+    <string name="btn_settings">设置</string>
+    <string name="settings_menu_title">设置</string>
+    <string name="settings_theme">应用主题</string>
+    <string name="settings_about">关于</string>
+    <string name="settings_general">常规</string>
+    <string name="general_settings_title">常规设置</string>
+    <string name="app_language">应用语言</string>
+    <string name="reset_defaults">重置默认设置</string>
+    <string name="reset_defaults_message">您确定要将所有设置重置为默认值吗？(这将禁用\"不再询问\"提示)。</string>
+    <string name="btn_invocation_method">调用方法</string>
+    <string name="dialog_invocation_title">选择调用方法</string>
+    <string name="method_swipe">向上滑动 (默认)</string>
+    <string name="method_back_button">长按返回键 (2秒)</string>
+    <string name="method_back_button_unavailable">长按返回键 (不可用)</string>
+    <string name="method_tile_only">仅设置磁贴</string>
+
+    <string name="theme_monochrome">单色 (黑白)</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_green">绿色</string>
+    <string name="theme_cyan">青色</string>
+    <string name="theme_red">红色</string>
+    <string name="theme_purple">紫色</string>
+
+    <string name="about_title">关于 AnEn</string>
+    <string name="about_version">版本 1.1.0</string>
+    <string name="about_description">快速保存单词的强大工具</string>
+    <string name="about_license">许可证</string>
+    <string name="about_license_text">此应用程序根据 MIT 许可证获得许可。</string>
+
+    <string name="btn_close">关闭</string>
+    <string name="btn_ok">确定</string>
+    <string name="btn_yes">是</string>
+    <string name="btn_cancel">取消</string>
+    <string name="dialog_warning_title">警告！</string>
+    <string name="delete_source_warning_message">此来源包含 %1$d 个单词。删除它将永久删除其所有单词。\n\n输入 \'%2$s\' 以确认。</string>
+    <string name="delete_language_warning_message">此语言包含 %1$d 个单词。删除它将永久删除其所有来源和单词。\n\n输入 \'%2$s\' 以确认。</string>
+
+    <string name="toast_no_apps_found">未找到合适的应用</string>
+    <string name="toast_need_permissions">请先授予所有权限</string>
+    <string name="toast_add_language">至少添加一种语言</string>
+    <string name="toast_export_empty">没有未导出的单词可保存</string>
+    <string name="toast_export_success">单词导出成功</string>
+    <string name="toast_import_success">单词导入成功</string>
+    <string name="toast_io_error">处理文件时发生错误</string>
+    <string name="toast_no_words_to_clear">您必须至少有 1 个单词才能清除数据</string>
+    <string name="toast_file_empty">文件为空</string>
+    <string name="toast_no_valid_header">文件头中没有有效的单词</string>
+    <string name="toast_no_valid_words">未找到有效的单词</string>
+    <string name="toast_imported_words">已导入 %1$d 个单词</string>
+    <string name="toast_imported_history">已导入 %1$d 个带历史记录的单词</string>
+    <string name="toast_selected_only_source">已选择唯一可用的来源</string>
+    <string name="toast_method_unavailable">您的 Android 版本不支持此方法。请使用滑动或磁贴。</string>
+    <string name="toast_tile_not_target">请先打开目标应用以添加单词。</string>
+    <string name="search_apps_hint">搜索应用...</string>
+    <string name="dialog_select_app_title">选择目标应用</string>
+</resources>

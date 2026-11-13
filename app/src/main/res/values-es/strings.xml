@@ -1,0 +1,143 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">AnEn</string>
+
+    <string name="service_toggle_label">Habilitar / Deshabilitar servicio</string>
+    <string name="btn_grant_overlay">Conceder permiso de superposición</string>
+    <string name="btn_grant_accessibility">Habilitar servicio de accesibilidad</string>
+    <string name="overlay_granted">Permiso de superposición concedido ✓</string>
+    <string name="accessibility_granted">Servicio de accesibilidad habilitado ✓</string>
+    <string name="btn_select_app">Seleccionar aplicación objetivo</string>
+    <string name="btn_select_app_selected">Objetivo: %1$s</string>
+    <string name="btn_select_app_multiple">Objetivos: %1$d aplicaciones</string>
+
+    <string name="accessibility_service_label">Servicio de superposición AnEn</string>
+    <string name="accessibility_service_description">Este servicio detecta la aplicación activa para mostrar la superposición de guardado de palabras.</string>
+    <string name="tile_label">Añadir palabra</string>
+    <string name="tile_description">Añadir una nueva palabra a AnEn</string>
+
+    <string name="input_hint">Introduce palabra...</string>
+    <string name="btn_save">Guardar</string>
+
+    <string name="btn_db_normal">Base de datos (Vista normal)</string>
+    <string name="btn_db_raw">Base de datos (Formato Raw)</string>
+    <string name="dialog_db_title">Base de datos (Vista normal)</string>
+    <string name="dialog_db_raw_title">Base de datos (Formato Raw)</string>
+    <string name="dialog_db_empty">La base de datos está vacía</string>
+    <string name="delimiter_label">Delimitador</string>
+    <string name="delimiter_tab">Tabulación</string>
+    <string name="delimiter_pipe">Barra vertical (|)</string>
+    <string name="delimiter_semicolon">Punto y coma (;)</string>
+    <string name="delimiter_colon">Dos puntos (:)</string>
+    <string name="delimiter_comma">Coma (,)</string>
+    <string name="delimiter_space">Espacio</string>
+
+    <string name="filter_languages">Filtrar idiomas</string>
+    <string name="filter_sources">Filtrar fuentes</string>
+    <string name="option_all">Todos</string>
+    <string name="btn_languages_all">Idiomas (Todos)</string>
+    <string name="btn_sources_all">Fuentes (Todas)</string>
+    <string name="btn_languages_count">Idiomas (%1$d)</string>
+    <string name="btn_sources_count">Fuentes (%1$d)</string>
+    <string name="btn_sources_none">Fuentes (Ninguna)</string>
+
+    <string name="working_languages_title">Idiomas de trabajo</string>
+    <string name="working_sources_title">Fuentes de trabajo</string>
+    <string name="language_name_hint">Nombre del idioma</string>
+    <string name="source_name_hint">Nombre de la fuente</string>
+    <string name="abbreviation_hint">Abreviatura (opcional, máx 3)</string>
+    <string name="add_source_to_lang">Añadir fuente a %1$s</string>
+
+    <string name="dialog_select_lang_title">Seleccionar idioma predeterminado</string>
+    <string name="dialog_select_src_title">Seleccionar fuente predeterminada</string>
+    <string name="editing_lang_names">Editando nombres de idiomas</string>
+    <string name="editing_src_names">Editando nombres de fuentes</string>
+    <string name="editing_abbrev">Editando abreviaturas</string>
+
+    <string name="btn_clear">Limpiar</string>
+    <string name="word_manager_title">Gestionar palabras</string>
+    <string name="search_words_hint">Buscar palabras...</string>
+    <string name="btn_exit">Salir</string>
+    <string name="confirm_delete_title">Eliminar palabra</string>
+    <string name="confirm_delete_message">¿Estás seguro de que quieres eliminar "%1$s"?</string>
+    <string name="dont_ask_again">No volver a preguntar</string>
+
+    <string name="btn_clear_data">Borrar datos</string>
+    <string name="clear_tool_title">Borrar datos</string>
+    <string name="clear_tool_message">¿Estás seguro de que quieres borrar los datos? Esta acción no se puede deshacer.</string>
+    <string name="save_languages">Guardar idiomas</string>
+    <string name="save_sources">Guardar fuentes</string>
+    <string name="clear_tool_type_langs">Escribe los nombres de TODOS tus idiomas separados por comas para confirmar:</string>
+
+    <string name="btn_export">Exportar</string>
+    <string name="btn_import">Importar</string>
+    <string name="btn_export_all">Exportar todo</string>
+    <string name="export_all_title">Exportar todas las palabras</string>
+    <string name="export_all_include_metadata">Incluir metadatos (Historial)</string>
+    <string name="export_all_warning">Los metadatos permiten restaurar las fechas de creación de palabras si reinstalas la aplicación.</string>
+
+    <string name="dialog_missing_components_title">Componentes faltantes</string>
+    <string name="dialog_missing_components_lang_header">Idiomas: %1$s</string>
+    <string name="dialog_missing_components_src_header">Fuentes: %1$s</string>
+    <string name="dialog_missing_components_question">¿Quieres crearlos e importar las palabras?</string>
+    <string name="btn_create_import">Crear e importar</string>
+    <string name="btn_skip">Omitir</string>
+    <string name="dialog_import_destination_title">Seleccionar destino de importación</string>
+    <string name="dialog_import_destination_message">Elige dónde colocar las palabras importadas:</string>
+    <string name="btn_import_action">Importar</string>
+
+    <string name="btn_settings">Ajustes</string>
+    <string name="settings_menu_title">Ajustes</string>
+    <string name="settings_theme">Tema de la aplicación</string>
+    <string name="settings_about">Acerca de</string>
+    <string name="settings_general">General</string>
+    <string name="general_settings_title">Ajustes generales</string>
+    <string name="app_language">Idioma de la aplicación</string>
+    <string name="reset_defaults">Restablecer ajustes predeterminados</string>
+    <string name="reset_defaults_message">¿Estás seguro de que quieres restablecer todos los ajustes? (Esto desactivará los mensajes de \"no volver a preguntar\").</string>
+    <string name="btn_invocation_method">Método de invocación</string>
+    <string name="dialog_invocation_title">Seleccionar método de invocación</string>
+    <string name="method_swipe">Deslizar hacia arriba (Predeterminado)</string>
+    <string name="method_back_button">Mantener botón Atrás (2s)</string>
+    <string name="method_back_button_unavailable">Mantener botón Atrás (No disponible)</string>
+    <string name="method_tile_only">Solo mosaico de ajustes</string>
+
+    <string name="theme_monochrome">Monocromático (B/N)</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_green">Verde</string>
+    <string name="theme_cyan">Cian</string>
+    <string name="theme_red">Rojo</string>
+    <string name="theme_purple">Púrpura</string>
+
+    <string name="about_title">Acerca de AnEn</string>
+    <string name="about_version">Versión 1.1.0</string>
+    <string name="about_description">Una herramienta potente para guardar palabras rápidamente</string>
+    <string name="about_license">Licencia</string>
+    <string name="about_license_text">Esta aplicación está bajo la Licencia MIT.</string>
+
+    <string name="btn_close">Cerrar</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_yes">Sí</string>
+    <string name="btn_cancel">Cancelar</string>
+    <string name="dialog_warning_title">¡Advertencia!</string>
+    <string name="delete_source_warning_message">Esta fuente contiene %1$d palabras. Eliminarla borrará permanentemente todas sus palabras.\n\nEscribe \'%2$s\' para confirmar.</string>
+    <string name="delete_language_warning_message">Este idioma contiene %1$d palabras. Eliminarlo borrará permanentemente todas sus fuentes y palabras.\n\nEscribe \'%2$s\' para confirmar.</string>
+
+    <string name="toast_no_apps_found">No se encontraron aplicaciones adecuadas</string>
+    <string name="toast_need_permissions">Por favor, concede todos los permisos primero</string>
+    <string name="toast_add_language">Añade al menos un idioma</string>
+    <string name="toast_export_empty">No hay palabras sin exportar para guardar</string>
+    <string name="toast_export_success">Palabras exportadas con éxito</string>
+    <string name="toast_import_success">Palabras importadas con éxito</string>
+    <string name="toast_io_error">Ocurrió un error al manejar el archivo</string>
+    <string name="toast_no_words_to_clear">Debes tener al menos 1 palabra para borrar datos</string>
+    <string name="toast_file_empty">El archivo está vacío</string>
+    <string name="toast_no_valid_header">No hay palabras válidas en el encabezado del archivo</string>
+    <string name="toast_no_valid_words">No se encontraron palabras válidas</string>
+    <string name="toast_imported_words">Importadas %1$d palabras</string>
+    <string name="toast_imported_history">Importadas %1$d palabras con historial</string>
+    <string name="toast_selected_only_source">Seleccionada la única fuente disponible</string>
+    <string name="toast_method_unavailable">Este método no es compatible con tu versión de Android. Usa Deslizar o Mosaico.</string>
+    <string name="toast_tile_not_target">Abre una aplicación objetivo primero para añadir una palabra.</string>
+    <string name="search_apps_hint">Buscar aplicaciones...</string>
+    <string name="dialog_select_app_title">Seleccionar aplicación objetivo</string>
+</resources>
