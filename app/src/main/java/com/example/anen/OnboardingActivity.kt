@@ -87,19 +87,23 @@ class OnboardingActivity : AppCompatActivity() {
             val (name, abbrev) = tempLanguages[i]
             val view = LayoutInflater.from(this).inflate(R.layout.item_language_manage, llContainer, false)
 
-            view.findViewById<TextView>(R.id.tvLanguageName).text = name
+            val etName = view.findViewById<TextInputEditText>(R.id.etLanguageName)
+            etName.setText(name)
+            etName.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    tempLanguages[i] = Pair(etName.text.toString().trim(), tempLanguages[i].second)
+                }
+            }
 
             val etAbbrev = view.findViewById<TextInputEditText>(R.id.etAbbreviation)
             etAbbrev.setText(abbrev)
-            // Update temp list when user edits abbreviation
             etAbbrev.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
-                    tempLanguages[i] = Pair(name, etAbbrev.text.toString().take(3))
+                    tempLanguages[i] = Pair(tempLanguages[i].first, etAbbrev.text.toString().take(3))
                 }
             }
 
             val btnDelete = view.findViewById<MaterialButton>(R.id.btnDeleteLanguage)
-            // Onboarding deletion: No confirmation needed
             btnDelete.setOnClickListener {
                 tempLanguages.removeAt(i)
                 renderLanguages()

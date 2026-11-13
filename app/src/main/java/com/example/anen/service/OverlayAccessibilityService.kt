@@ -12,6 +12,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
+import android.widget.Toast
 import com.example.anen.data.DBHelper
 import com.example.anen.overlay.OverlayManager
 import com.example.anen.utils.PreferencesManager
@@ -30,9 +31,12 @@ class OverlayAccessibilityService : AccessibilityService() {
     private val overlayReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == "com.example.anen.SHOW_INPUT_OVERLAY") {
-                Log.d(TAG, "Broadcast received. Showing overlay.")
                 Handler(Looper.getMainLooper()).post {
-                    // Get default IDs and pass them to the overlay
+                    // FIX: Block if no languages exist
+                    if (dbHelper.getAllLanguages().isEmpty()) {
+                        Toast.makeText(context, "Add at least one language in the app", Toast.LENGTH_SHORT).show()
+                        return@post
+                    }
                     val langId = preferencesManager.getDefaultLanguageId()
                     val srcId = preferencesManager.getDefaultSourceId()
                     overlayManager.showInputWindow(0f, 0f, langId, srcId) { }
@@ -54,7 +58,6 @@ class OverlayAccessibilityService : AccessibilityService() {
 
         val filter = IntentFilter("com.example.anen.SHOW_INPUT_OVERLAY")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // RECEIVER_NOT_EXPORTED fixes the lint warning
             registerReceiver(overlayReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
             registerReceiver(overlayReceiver, filter)
@@ -88,8 +91,13 @@ class OverlayAccessibilityService : AccessibilityService() {
         val isTargetApp = isServiceEnabled && targetPackages.contains(activePackage)
 
         if (isTargetApp && invocationMethod == "swipe") {
+            // FIX: Block swipe overlay if no languages exist
+            if (dbHelper.getAllLanguages().isEmpty()) {
+                overlayManager.hideOverlay()
+                return
+            }
+
             overlayManager.showOverlay { endX, endY ->
-                // Get default IDs and pass them
                 val langId = preferencesManager.getDefaultLanguageId()
                 val srcId = preferencesManager.getDefaultSourceId()
                 overlayManager.showInputWindow(endX, endY, langId, srcId) {
@@ -112,6 +120,11 @@ class OverlayAccessibilityService : AccessibilityService() {
         val invocationMethod = preferencesManager.getInvocationMethod()
 
         if (!isServiceEnabled || activePackage == null || !targetPackages.contains(activePackage) || invocationMethod != "back_button") {
+            return super.onKeyEvent(event)
+        }
+
+        // FIX: Block back button overlay if no languages exist
+        if (dbHelper.getAllLanguages().isEmpty()) {
             return super.onKeyEvent(event)
         }
 
@@ -151,6 +164,8 @@ class OverlayAccessibilityService : AccessibilityService() {
         val invocationMethod = preferencesManager.getInvocationMethod()
 
         if (activePackage != null && targetPackages.contains(activePackage) && preferencesManager.isServiceEnabled() && invocationMethod == "swipe") {
+            if (dbHelper.getAllLanguages().isEmpty()) return // FIX: Block rotation re-draw
+
             overlayManager.hideOverlay()
             Handler(Looper.getMainLooper()).postDelayed({
                 overlayManager.showOverlay { x, y ->

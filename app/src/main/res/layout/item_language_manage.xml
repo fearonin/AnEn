@@ -6,13 +6,18 @@
     android:padding="8dp"
     android:gravity="center_vertical">
 
-    <TextView
-        android:id="@+id/tvLanguageName"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:layout_marginEnd="8dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etLanguageName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="80dp"

@@ -180,6 +180,25 @@ class MainActivity : AppCompatActivity() {
             checkPermissionsAndRun { showSourceSelectionDialog() }
         }
 
+        val hasLanguages = { dbHelper.getAllLanguages().isNotEmpty() }
+
+        btnDbNormal.setOnClickListener {
+            if (!hasLanguages()) Toast.makeText(this, "Add at least one language", Toast.LENGTH_SHORT).show()
+            else checkPermissionsAndRun { showNormalDatabaseView() }
+        }
+        btnDbRaw.setOnClickListener {
+            if (!hasLanguages()) Toast.makeText(this, "Add at least one language", Toast.LENGTH_SHORT).show()
+            else checkPermissionsAndRun { showRawDatabaseView() }
+        }
+        btnExport.setOnClickListener {
+            if (!hasLanguages()) Toast.makeText(this, "Add at least one language", Toast.LENGTH_SHORT).show()
+            else checkPermissionsAndRun { showExportDialog(isExportAll = false) }
+        }
+        btnExportAll.setOnClickListener {
+            if (!hasLanguages()) Toast.makeText(this, "Add at least one language", Toast.LENGTH_SHORT).show()
+            else checkPermissionsAndRun { showExportDialog(isExportAll = true) }
+        }
+
 
         btnSettings.setOnClickListener { showSettingsMenu() }
     }
@@ -745,6 +764,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun performActualImport(wordsPart: String, metadataPart: String) {
+        // FIX: Extract all words that actually exist in the top part of the file
+        val validWords = wordsPart.split(Regex("[|;:,\\t\\n\\s]+"))
+            .map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toSet()
+
+        if (validWords.isEmpty()) {
+            Toast.makeText(this, "No valid words in the file header", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         lifecycleScope.launch(Dispatchers.IO) {
             var count = 0
             val lines = metadataPart.lines().filter { it.isNotBlank() && !it.contains("id|word") }
@@ -753,6 +781,10 @@ class MainActivity : AppCompatActivity() {
                 val parts = line.split("|")
                 if (parts.size >= 6) {
                     val wordText = parts[1].trim().lowercase()
+
+                    // FIX: Skip if the word is not in the actual file header
+                    if (!validWords.contains(wordText)) continue
+
                     val langName = parts[2].trim()
                     val srcName = parts[3].trim()
                     val timestamp = parts[4].toLongOrNull() ?: System.currentTimeMillis()
@@ -1164,29 +1196,54 @@ class MainActivity : AppCompatActivity() {
     private fun updateLanguageAndSourceButtons() {
         val languages = dbHelper.getAllLanguages()
 
-        // If only 1 language, hide the Languages button and make Sources full width
+        // BUG 4 FIX: If 0 languages, hide both buttons
+        if (languages.isEmpty()) {
+            btnLanguages.visibility = View.GONE
+            btnSources.visibility = View.GONE
+            return
+        } else {
+            btnSources.visibility = View.VISIBLE
+        }
+
+        // BUG 2 FIX: Fallback if default language was deleted
+        var defaultLangId = preferencesManager.getDefaultLanguageId()
+        var defaultLang = dbHelper.getLanguageById(defaultLangId)
+
+        if (defaultLang == null) {
+            // Auto-select the first available language
+            defaultLang = languages.first()
+            defaultLangId = defaultLang.id
+            preferencesManager.setDefaultLanguageId(defaultLangId)
+        }
+
+        // UI update for Languages button
         if (languages.size <= 1) {
             btnLanguages.visibility = View.GONE
             val params = btnSources.layoutParams as LinearLayout.LayoutParams
-            params.weight = 2f // Take full width
+            params.weight = 2f
             params.marginStart = 0
             btnSources.layoutParams = params
         } else {
             btnLanguages.visibility = View.VISIBLE
             val params = btnSources.layoutParams as LinearLayout.LayoutParams
-            params.weight = 1f // Half width
+            params.weight = 1f
             params.marginStart = 16
             btnSources.layoutParams = params
         }
 
-        // Update text
-        val defaultLangId = preferencesManager.getDefaultLanguageId()
-        val defaultLang = dbHelper.getLanguageById(defaultLangId)
-        btnLanguages.text = defaultLang?.abbreviation ?: "Lang"
+        btnLanguages.text = defaultLang.abbreviation
 
-        val defaultSourceId = preferencesManager.getDefaultSourceId()
-        val defaultSource = dbHelper.getSourceById(defaultSourceId)
-        btnSources.text = defaultSource?.abbreviation ?: "Src"
+        // Check default source (fallback to first if deleted)
+        val sources = dbHelper.getSourcesForLanguage(defaultLangId)
+        var defaultSrcId = preferencesManager.getDefaultSourceId()
+        var defaultSrc = sources.find { it.id == defaultSrcId }
+
+        if (defaultSrc == null && sources.isNotEmpty()) {
+            defaultSrc = sources.first()
+            preferencesManager.setDefaultSourceId(defaultSrc.id)
+        }
+
+        btnSources.text = defaultSrc?.abbreviation ?: "Src"
     }
 
     private fun showLanguageSelectionDialog() {

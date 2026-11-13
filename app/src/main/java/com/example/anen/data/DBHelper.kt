@@ -158,6 +158,16 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
     fun addLanguage(name: String, abbreviation: String): Long {
         val db = this.writableDatabase
+
+        // Check for case-insensitive duplicates
+        val cursor = db.rawQuery("SELECT $COLUMN_ID FROM $TABLE_LANGUAGES WHERE LOWER($COLUMN_NAME) = LOWER(?)", arrayOf(name))
+        if (cursor.count > 0) {
+            cursor.close()
+            db.close()
+            return -1 // Indicates a duplicate was found
+        }
+        cursor.close()
+
         val values = ContentValues().apply {
             put(COLUMN_NAME, name)
             put(COLUMN_ABBREVIATION, abbreviation)

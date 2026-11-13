@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +20,7 @@ class WorkingLanguagesActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DBHelper
     private lateinit var adapter: LanguageAdapter
+    private var isEditMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,8 +28,13 @@ class WorkingLanguagesActivity : AppCompatActivity() {
 
         dbHelper = DBHelper(this)
 
-        findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbarLanguages).setNavigationOnClickListener {
-            finish()
+        findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbarLanguages).setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_edit) {
+                isEditMode = !isEditMode
+                adapter.notifyDataSetChanged() // Refresh list to update states
+                Toast.makeText(this, if (isEditMode) "Editing Language Names" else "Editing Abbreviations", Toast.LENGTH_SHORT).show()
+                true
+            } else false
         }
 
         val rv = findViewById<RecyclerView>(R.id.rvLanguages)
@@ -54,7 +59,6 @@ class WorkingLanguagesActivity : AppCompatActivity() {
         }
     }
 
-    // Adapter for RecyclerView
     inner class LanguageAdapter(
         private var items: List<Language>,
         private val dbHelper: DBHelper
@@ -72,19 +76,32 @@ class WorkingLanguagesActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val language = items[position]
-            holder.tvName.text = language.name
+
+            // Set text without triggering focus listeners immediately
+            holder.etName.setText(language.name)
             holder.etAbbrev.setText(language.abbreviation)
 
+            // Toggle editability based on isEditMode
+            holder.etName.isEnabled = isEditMode
+            holder.etAbbrev.isEnabled = !isEditMode
+
+            // Save Name on focus loss
+            holder.etName.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus && isEditMode) {
+                    val newName = holder.etName.text.toString().trim()
+                    if (newName.isNotEmpty() && newName != language.name) {
+                        dbHelper.updateLanguage(language.id, newName, language.abbreviation)
+                        updateList(dbHelper.getAllLanguages())
+                    }
+                }
+            }
+
+            // Save Abbreviation on focus loss
             holder.etAbbrev.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus) {
+                if (!hasFocus && !isEditMode) {
                     val newAbbrev = holder.etAbbrev.text.toString().take(3)
                     if (newAbbrev != language.abbreviation && newAbbrev.isNotEmpty()) {
                         dbHelper.updateLanguage(language.id, language.name, newAbbrev)
-                        // Update local list
-                        items[position].let {
-                            // Data class is val, need to recreate or make var
-                            // For simplicity, just reload list
-                        }
                         updateList(dbHelper.getAllLanguages())
                     }
                 }
@@ -93,7 +110,6 @@ class WorkingLanguagesActivity : AppCompatActivity() {
             holder.btnDelete.setOnClickListener {
                 val wordCount = dbHelper.getWordCountForLanguage(language.id)
                 if (wordCount == 0) {
-                    // Simple delete
                     AlertDialog.Builder(this@WorkingLanguagesActivity)
                         .setTitle("Delete Language")
                         .setMessage("Delete '${language.name}'? This cannot be undone.")
@@ -104,7 +120,6 @@ class WorkingLanguagesActivity : AppCompatActivity() {
                         .setNegativeButton("Cancel", null)
                         .show()
                 } else {
-                    // Secure delete
                     showSecureDeleteDialog(language, wordCount)
                 }
             }
@@ -113,7 +128,7 @@ class WorkingLanguagesActivity : AppCompatActivity() {
         override fun getItemCount() = items.size
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val tvName: TextView = view.findViewById(R.id.tvLanguageName)
+            val etName: TextInputEditText = view.findViewById(R.id.etLanguageName)
             val etAbbrev: TextInputEditText = view.findViewById(R.id.etAbbreviation)
             val btnDelete: MaterialButton = view.findViewById(R.id.btnDeleteLanguage)
         }
