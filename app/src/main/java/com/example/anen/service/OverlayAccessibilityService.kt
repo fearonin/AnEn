@@ -57,11 +57,13 @@ class OverlayAccessibilityService : AccessibilityService() {
         overlayManager = OverlayManager(this, dbHelper)
 
         val filter = IntentFilter("com.example.anen.SHOW_INPUT_OVERLAY")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(overlayReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(overlayReceiver, filter)
-        }
+        // Безопасная регистрация для всех версий Android (убирает ошибку линтера)
+        androidx.core.content.ContextCompat.registerReceiver(
+            this,
+            overlayReceiver,
+            filter,
+            androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
+        )
 
         Log.d(TAG, "Accessibility Service Connected")
     }

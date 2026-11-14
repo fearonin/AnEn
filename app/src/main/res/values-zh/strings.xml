@@ -109,7 +109,7 @@
     <string name="theme_purple">紫色</string>
 
     <string name="about_title">关于 AnEn</string>
-    <string name="about_version">版本 1.1.0</string>
+    <string name="about_version">版本 1.0</string>
     <string name="about_description">快速保存单词的强大工具</string>
     <string name="about_license">许可证</string>
     <string name="about_license_text">此应用程序根据 MIT 许可证获得许可。</string>

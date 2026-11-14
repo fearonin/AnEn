@@ -140,7 +140,7 @@
     <string name="theme_purple">Purple</string>
 
     <string name="about_title">About AnEn</string>
-    <string name="about_version">Version 1.1.0</string>
+    <string name="about_version">Version 1.0</string>
     <string name="about_description">A powerful tool for quick word saving</string>
     <string name="about_license">License</string>
     <string name="about_license_text">This application is licensed under the MIT License.</string>

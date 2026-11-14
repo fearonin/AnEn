@@ -16,7 +16,7 @@ class AddWordTileService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
         val tile = qsTile ?: return
-        // Always keep it clickable (grey) to avoid OEM caching bugs (like on Honor)
+        // Always keep it clickable (gray) to avoid OEM caching bugs (like on Honor)
         tile.state = Tile.STATE_INACTIVE
         tile.label = getString(R.string.tile_label)
         tile.updateTile()

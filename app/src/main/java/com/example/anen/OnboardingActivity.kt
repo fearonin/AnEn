@@ -3,10 +3,7 @@ package com.example.anen
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.anen.data.DBHelper
@@ -23,7 +20,6 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var btnAdd: MaterialButton
     private lateinit var btnFinish: MaterialButton
 
-    // Temporary list before saving to DB
     private val tempLanguages = mutableListOf<Pair<String, String>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +34,6 @@ class OnboardingActivity : AppCompatActivity() {
         btnAdd = findViewById(R.id.btnAddLanguage)
         btnFinish = findViewById(R.id.btnFinishOnboarding)
 
-        // Add default English
         tempLanguages.add(Pair("English", "Eng"))
         renderLanguages()
 
@@ -58,16 +53,13 @@ class OnboardingActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Save to DB
             tempLanguages.forEach { (name, abbrev) ->
                 val langId = dbHelper.addLanguage(name, abbrev)
-                // Create default source for each language
                 if (langId > 0) {
                     dbHelper.addSource(langId.toInt(), "Default", "Def")
                 }
             }
 
-            // Set default language to the first one added
             val firstLanguage = dbHelper.getAllLanguages().firstOrNull()
             if (firstLanguage != null) {
                 preferencesManager.setDefaultLanguageId(firstLanguage.id)
@@ -75,7 +67,6 @@ class OnboardingActivity : AppCompatActivity() {
 
             preferencesManager.setOnboardingCompleted(true)
 
-            // Go to MainActivity
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
@@ -87,24 +78,25 @@ class OnboardingActivity : AppCompatActivity() {
             val (name, abbrev) = tempLanguages[i]
             val view = LayoutInflater.from(this).inflate(R.layout.item_language_manage, llContainer, false)
 
+            // Безопасный поиск с ?.
             val etName = view.findViewById<TextInputEditText>(R.id.etLanguageName)
-            etName.setText(name)
-            etName.setOnFocusChangeListener { _, hasFocus ->
+            etName?.setText(name)
+            etName?.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     tempLanguages[i] = Pair(etName.text.toString().trim(), tempLanguages[i].second)
                 }
             }
 
             val etAbbrev = view.findViewById<TextInputEditText>(R.id.etAbbreviation)
-            etAbbrev.setText(abbrev)
-            etAbbrev.setOnFocusChangeListener { _, hasFocus ->
+            etAbbrev?.setText(abbrev)
+            etAbbrev?.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     tempLanguages[i] = Pair(tempLanguages[i].first, etAbbrev.text.toString().take(3))
                 }
             }
 
             val btnDelete = view.findViewById<MaterialButton>(R.id.btnDeleteLanguage)
-            btnDelete.setOnClickListener {
+            btnDelete?.setOnClickListener {
                 tempLanguages.removeAt(i)
                 renderLanguages()
             }

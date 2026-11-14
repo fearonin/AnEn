@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- DEFAULT: Monochrome -->
-    <style name="Theme.AnEn" parent="Theme.Material3.Dark.NoActionBar"> tools:targetApi="31">
+    <style name="Theme.AnEn" parent="Theme.Material3.Dark.NoActionBar" tools:targetApi="31">
         <item name="colorPrimary">@color/mono_primary</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/mono_secondary</item>
@@ -13,8 +13,6 @@
         <item name="colorOnSurfaceVariant">@color/white</item>
         <item name="colorOutline">@color/mono_secondary</item>
         <item name="android:windowBackground">@color/mono_bg</item>
-        <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@mipmap/ic_launcher_foreground</item>
-        <item name="android:windowSplashScreenIconBackgroundColor" tools:ignore="NewApi">@color/black</item>
     </style>
 
     <!-- CYAN -->
@@ -81,17 +79,13 @@
     <style name="Theme.AnEn.Light" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/dark_gray</item>
         <item name="colorOnPrimary">@color/white</item>
-
         <item name="colorSecondary">@color/light_secondary</item>
         <item name="colorOnSecondary">@color/black</item>
         <item name="colorTertiary">@color/dark_gray</item>
-
         <item name="colorSurface">@color/light_surface</item>
         <item name="colorOnSurface">@color/black</item>
-
         <item name="colorSurfaceVariant">@color/light_secondary</item>
         <item name="colorOnSurfaceVariant">@color/black</item>
-
         <item name="colorOutline">@color/dark_gray</item>
         <item name="android:windowBackground">@color/light_bg</item>
     </style>

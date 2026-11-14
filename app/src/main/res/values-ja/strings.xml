@@ -109,7 +109,7 @@
     <string name="theme_purple">パープル</string>
 
     <string name="about_title">AnEnについて</string>
-    <string name="about_version">バージョン 1.1.0</string>
+    <string name="about_version">バージョン 1.0</string>
     <string name="about_description">単語を素早く保存するための強力なツール</string>
     <string name="about_license">ライセンス</string>
     <string name="about_license_text">このアプリケーションはMITライセンスの下でライセンスされています。</string>

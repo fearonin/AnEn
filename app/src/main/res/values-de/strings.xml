@@ -109,7 +109,7 @@
     <string name="theme_purple">Lila</string>
 
     <string name="about_title">Über AnEn</string>
-    <string name="about_version">Version 1.1.0</string>
+    <string name="about_version">Version 1.0</string>
     <string name="about_description">Ein leistungsstarkes Tool zum schnellen Speichern von Wörtern</string>
     <string name="about_license">Lizenz</string>
     <string name="about_license_text">Diese Anwendung ist unter der MIT-Lizenz lizenziert.</string>

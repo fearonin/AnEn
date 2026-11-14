@@ -40,8 +40,8 @@ class GeneralSettingsActivity : AppCompatActivity() {
     }
 
     private fun showLanguagePicker() {
-        val languages = arrayOf("English", "Русский", "Español", "日本語", "中文", "Deutsch")
-        val localeCodes = arrayOf("en", "ru", "es", "ja", "zh", "de")
+        val languages = arrayOf("English", "Русский", "Español", "日本語", "中文", "Deutsch", "한국어")
+        val localeCodes = arrayOf("en", "ru", "es", "ja", "zh", "de", "ko")
 
         val currentLocale = AppCompatDelegate.getApplicationLocales().toLanguageTags()
         val currentIndex = localeCodes.indexOfFirst { currentLocale.startsWith(it) }.coerceAtLeast(0)
@@ -52,7 +52,7 @@ class GeneralSettingsActivity : AppCompatActivity() {
                 val locale = LocaleListCompat.forLanguageTags(localeCodes[which])
                 AppCompatDelegate.setApplicationLocales(locale)
                 dialog.dismiss()
-                recreate() // Recreate to apply language to this activity
+                recreate()
             }
             .show()
     }

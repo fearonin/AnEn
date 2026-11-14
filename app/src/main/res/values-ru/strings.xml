@@ -140,7 +140,7 @@
     <string name="theme_purple">Фиолетовая</string>
 
     <string name="about_title">О приложении AnEn</string>
-    <string name="about_version">Версия 1.1.0</string>
+    <string name="about_version">Версия 1.0</string>
     <string name="about_description">Удобный инструмент для быстрого сохранения слов</string>
     <string name="about_license">Лицензия</string>
     <string name="about_license_text">Это приложение распространяется под лицензией MIT.</string>

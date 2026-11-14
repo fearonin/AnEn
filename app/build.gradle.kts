@@ -11,15 +11,13 @@ android {
         applicationId = "com.example.anen"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        versionCode = 1
+        versionName = "1.0"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = false //
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -36,7 +34,6 @@ android {
 }
 
 dependencies {
-    // Core Android dependencies. Keeping it minimal.
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")

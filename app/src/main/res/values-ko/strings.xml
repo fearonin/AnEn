@@ -140,7 +140,7 @@
     <string name="theme_purple">퍼플</string>
 
     <string name="about_title">AnEn 정보</string>
-    <string name="about_version">버전 1.1.0</string>
+    <string name="about_version">버전 1.0</string>
     <string name="about_description">빠른 단어 저장을 위한 강력한 도구</string>
     <string name="about_license">라이선스</string>
     <string name="about_license_text">이 애플리케이션은 MIT 라이선스에 따라 라이선스가 부여됩니다.</string>

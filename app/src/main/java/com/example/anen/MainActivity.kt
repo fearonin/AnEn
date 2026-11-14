@@ -167,11 +167,15 @@ class MainActivity : AppCompatActivity() {
 
         btnClearAll.setOnClickListener {
             withPermissionsAndLanguages {
-                val intent = Intent(this, WordManagerActivity::class.java).apply {
-                    putExtra("LANG_ID", preferencesManager.getDefaultLanguageId())
-                    putExtra("SRC_ID", preferencesManager.getDefaultSourceId())
+                if (dbHelper.getTotalWordsCount() == 0) {
+                    Toast.makeText(this, R.string.toast_no_words_to_clear, Toast.LENGTH_SHORT).show()
+                } else {
+                    val intent = Intent(this, WordManagerActivity::class.java).apply {
+                        putExtra("LANG_ID", preferencesManager.getDefaultLanguageId())
+                        putExtra("SRC_ID", preferencesManager.getDefaultSourceId())
+                    }
+                    startActivity(intent)
                 }
-                startActivity(intent)
             }
         }
 
